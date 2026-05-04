@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { SquarePen, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Check, SquarePen, Trash2 } from "lucide-react";
 import { CommitTimeline } from "@/components/commits/CommitTimeline";
 
 import {
+  addChatParticipants,
   createChat,
   createPersonalChat,
   deleteChat,
@@ -71,6 +72,10 @@ export function ChatWorkspace() {
   const [isClosingCreateModal, setIsClosingCreateModal] = useState(false);
   const [isClosingPersonalModal, setIsClosingPersonalModal] = useState(false);
   const [isClosingDeleteModal, setIsClosingDeleteModal] = useState(false);
+  const [showAddParticipantsModal, setShowAddParticipantsModal] = useState(false);
+  const [isClosingAddParticipantsModal, setIsClosingAddParticipantsModal] = useState(false);
+  const [participantSearchQuery, setParticipantSearchQuery] = useState("");
+  const [participantSearchResults, setParticipantSearchResults] = useState<User[]>([]);
   const [userQuery, setUserQuery] = useState("");
   const [userResults, setUserResults] = useState<User[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
@@ -80,6 +85,9 @@ export function ChatWorkspace() {
   const [createChatValidationError, setCreateChatValidationError] = useState("");
   const [deleteTargetId, setDeleteTargetId] = useState<string>("");
   const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
+  const [activitySectionOpen, setActivitySectionOpen] = useState(true);
+  const [participantsSectionOpen, setParticipantsSectionOpen] = useState(true);
+  const [exitingMessageIds, setExitingMessageIds] = useState<number[]>([]);
 
   const socketRef = useRef<WebSocket | null>(null);
   const MODAL_ANIM_MS = 240;
@@ -107,6 +115,16 @@ export function ChatWorkspace() {
       setIsClosingDeleteModal(false);
     }, MODAL_ANIM_MS);
   };
+
+  const closeAddParticipantsModal = useCallback(() => {
+    setIsClosingAddParticipantsModal(true);
+    window.setTimeout(() => {
+      setShowAddParticipantsModal(false);
+      setIsClosingAddParticipantsModal(false);
+      setParticipantSearchQuery("");
+      setParticipantSearchResults([]);
+    }, MODAL_ANIM_MS);
+  }, []);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -176,6 +194,10 @@ export function ChatWorkspace() {
   }, [token]);
 
   useEffect(() => {
+    setExitingMessageIds([]);
+  }, [activeChatId]);
+
+  useEffect(() => {
     if (!token || !activeChatId) return;
     const loadData = async () => {
       const [msgs, commitsData, participants] = await Promise.all([
@@ -223,6 +245,30 @@ export function ChatWorkspace() {
   }, [showCreateProjectModal, showPersonalModal, token, userQuery]);
 
   useEffect(() => {
+    if (!token || !showAddParticipantsModal || participantSearchQuery.trim().length < 2) {
+      setParticipantSearchResults([]);
+      return;
+    }
+    const timer = window.setTimeout(async () => {
+      try {
+        setParticipantSearchResults(await searchUsers(token, participantSearchQuery.trim()));
+      } catch {
+        setParticipantSearchResults([]);
+      }
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [token, showAddParticipantsModal, participantSearchQuery]);
+
+  useEffect(() => {
+    if (!showAddParticipantsModal) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeAddParticipantsModal();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showAddParticipantsModal, closeAddParticipantsModal]);
+
+  useEffect(() => {
     if (!token || !activeChatId) return;
     const socket = new WebSocket(`${API_BASE_URL.replace("http", "ws")}/ws/chat/${activeChatId}?token=${token}`);
     socketRef.current = socket;
@@ -255,6 +301,18 @@ export function ChatWorkspace() {
 
   const activeChat = chats.find((chat) => chat.id === activeChatId) ?? null;
   const activeParticipants = activeChatId ? participantsByChat[activeChatId] ?? [] : [];
+
+  const handleAddParticipant = async (target: User) => {
+    if (!token || !activeChatId) return;
+    if (activeParticipants.some((p) => p.id === target.id)) return;
+    try {
+      await addChatParticipants(token, activeChatId, [target.id]);
+      const list = await listParticipants(token, activeChatId);
+      setParticipantsByChat((prev) => ({ ...prev, [activeChatId]: list }));
+    } catch {
+      setError("Не удалось добавить участника");
+    }
+  };
   const createChatUserRows = Math.max(userResults.length, 1);
   const createChatUsersHeight = createChatUserRows * 62;
 
@@ -329,7 +387,11 @@ export function ChatWorkspace() {
     if (!token || !activeChatId) return;
     try {
       await deleteMessage(token, activeChatId, message.id);
-      setMessages((prev) => prev.filter((item) => item.id !== message.id));
+      setExitingMessageIds((prev) => (prev.includes(message.id) ? prev : [...prev, message.id]));
+      window.setTimeout(() => {
+        setMessages((prev) => prev.filter((item) => item.id !== message.id));
+        setExitingMessageIds((prev) => prev.filter((id) => id !== message.id));
+      }, 320);
     } catch {
       setError("Не удалось удалить сообщение");
     }
@@ -440,7 +502,18 @@ export function ChatWorkspace() {
             <p>● Active now</p>
           </div>
           <div className="topbar-icons">
-            <button type="button" className="icon-btn" onClick={() => (activeTab === "projects" ? setShowCreateProjectModal(true) : setShowPersonalModal(true))}>+</button>
+            <button
+              type="button"
+              className="icon-btn"
+              title={activeChatId ? "Добавить участников" : "Выберите чат"}
+              disabled={!activeChatId}
+              onClick={() => {
+                if (!activeChatId) return;
+                setShowAddParticipantsModal(true);
+              }}
+            >
+              +
+            </button>
             <button type="button" className="icon-btn" onClick={() => setIsRightPanelVisible((prev) => !prev)} title={isRightPanelVisible ? "Hide right panel" : "Show right panel"}>
               <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M3 3h10v10H3zM2 2v12h12V2z" /></svg>
             </button>
@@ -451,7 +524,7 @@ export function ChatWorkspace() {
           {messages.map((message) => (
             <article
               key={message.id}
-              className={`message-bubble ${message.user_id === user?.id ? "own" : ""}`}
+              className={`message-bubble ${message.user_id === user?.id ? "own" : ""} ${exitingMessageIds.includes(message.id) ? "message-exiting" : ""}`}
               onContextMenu={(event) => {
                 event.preventDefault();
                 setContextMenu({ x: event.clientX, y: event.clientY, type: "message", message });
@@ -475,25 +548,103 @@ export function ChatWorkspace() {
             <p>Senior Backend Engineer</p>
           </div>
           <div className="activity-card">
-            <div className="activity-head"><h4>RECENT ACTIVITY</h4></div>
-            <div className="activity-list">
-            <CommitTimeline commits={commits.slice(0, 12)} branchName={activeChat?.repository?.default_branch ?? "main"} />
-            </div>
-            <div className="participants-box">
-              <h4>PARTICIPANTS</h4>
-              {activeParticipants.map((member) => (
-                <div key={member.id} className="participant-row">
-                  <span className="conversation-avatar">{initials(member.username)}</span>
-                  <div><strong>{member.username}</strong><p>{member.email}</p></div>
+            <div className={`profile-sidebar-section ${activitySectionOpen ? "" : "collapsed"}`}>
+              <div className="activity-head">
+                <h4>RECENT ACTIVITY</h4>
+                <button
+                  type="button"
+                  className="section-toggle-btn"
+                  aria-expanded={activitySectionOpen}
+                  aria-label={activitySectionOpen ? "Свернуть активность" : "Развернуть активность"}
+                  onClick={() => setActivitySectionOpen((v) => !v)}
+                >
+                  <span className="section-toggle-icon-wrap">
+                    <Check size={14} strokeWidth={2.5} />
+                  </span>
+                </button>
+              </div>
+              <div className="profile-section-collapse">
+                <div className="profile-section-collapse-inner">
+                  <div className="activity-list">
+                    <CommitTimeline commits={commits.slice(0, 12)} branchName={activeChat?.repository?.default_branch ?? "main"} />
+                  </div>
                 </div>
-              ))}
+              </div>
+            </div>
+            <div className={`participants-box profile-sidebar-section ${participantsSectionOpen ? "" : "collapsed"}`}>
+              <div className="participants-head">
+                <h4>PARTICIPANTS</h4>
+                <button
+                  type="button"
+                  className="section-toggle-btn"
+                  aria-expanded={participantsSectionOpen}
+                  aria-label={participantsSectionOpen ? "Свернуть участников" : "Развернуть участников"}
+                  onClick={() => setParticipantsSectionOpen((v) => !v)}
+                >
+                  <span className="section-toggle-icon-wrap">
+                    <Check size={14} strokeWidth={2.5} />
+                  </span>
+                </button>
+              </div>
+              <div className="profile-section-collapse">
+                <div className="profile-section-collapse-inner">
+                  <div className="participants-list-inner">
+                    {activeParticipants.map((member) => (
+                      <div key={member.id} className="participant-row">
+                        <span className="conversation-avatar">{initials(member.username)}</span>
+                        <div><strong>{member.username}</strong><p>{member.email}</p></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </aside>
 
+      {showAddParticipantsModal && (
+        <div className={`modal-overlay ${isClosingAddParticipantsModal ? "closing" : ""}`} onClick={closeAddParticipantsModal}>
+          <div className="add-user-modal theme-modal add-participants-modal" onClick={(e) => e.stopPropagation()}>
+            <p className="modal-title">Добавить участников</p>
+            <p className="muted small modal-subtitle">Поиск по имени или email — минимум 2 символа</p>
+            <div className="sidebar-search modal-search">
+              <input
+                placeholder="Поиск пользователей..."
+                value={participantSearchQuery}
+                onChange={(e) => setParticipantSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="modal-container users">
+              {participantSearchResults
+                .filter((u) => !activeParticipants.some((p) => p.id === u.id))
+                .map((foundUser) => (
+                  <button key={foundUser.id} type="button" className="add-user-item" onClick={() => void handleAddParticipant(foundUser)}>
+                    <span className="conversation-avatar">{initials(foundUser.username)}</span>
+                    <div>
+                      <strong>{foundUser.username}</strong>
+                      <p>{foundUser.email}</p>
+                    </div>
+                  </button>
+                ))}
+              {participantSearchQuery.trim().length < 2 && (
+                <p className="muted small add-participants-hint">Введите запрос для поиска</p>
+              )}
+              {participantSearchQuery.trim().length >= 2 && participantSearchResults.filter((u) => !activeParticipants.some((p) => p.id === u.id)).length === 0 && (
+                <p className="muted small add-participants-hint">Нет пользователей или все уже в чате</p>
+              )}
+            </div>
+            <div className="create-chat-actions">
+              <button type="button" className="btn primary create-chat-btn" onClick={closeAddParticipantsModal}>
+                Готово
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showCreateProjectModal && (
         <div className={`modal-overlay ${isClosingCreateModal ? "closing" : ""}`} onClick={closeCreateModal}>
-          <div className="add-user-modal create-chat-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="add-user-modal theme-modal create-chat-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-container create-chat-form">
               <p className="modal-title">Создать чат</p>
               <input
@@ -617,7 +768,7 @@ export function ChatWorkspace() {
 
       {showPersonalModal && (
         <div className={`modal-overlay ${isClosingPersonalModal ? "closing" : ""}`} onClick={closePersonalModal}>
-          <div className="add-user-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="add-user-modal theme-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-container">
               <p className="modal-title">Личные сообщения</p>
               <input className="field" placeholder="Search user by username/email..." value={userQuery} onChange={(e) => setUserQuery(e.target.value)} />
@@ -636,7 +787,7 @@ export function ChatWorkspace() {
 
       {showDeleteModal && (
         <div className={`modal-overlay ${isClosingDeleteModal ? "closing" : ""}`} onClick={closeDeleteModal}>
-          <div className="add-user-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="add-user-modal theme-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-container">
               <p className="modal-title">Удалить чат</p>
               <select className="field" value={deleteTargetId} onChange={(e) => setDeleteTargetId(e.target.value)}>
@@ -670,14 +821,16 @@ export function ChatWorkspace() {
             className="context-menu-item danger"
             onClick={async () => {
               if (contextMenu.type === "message") {
-                await onDeleteMessage(contextMenu.message);
+                const msg = contextMenu.message;
+                setContextMenu(null);
+                await onDeleteMessage(msg);
               } else {
                 if (!token) return;
                 await deleteChat(token, contextMenu.chat.id);
                 setChats((prev) => prev.filter((chat) => chat.id !== contextMenu.chat.id));
                 if (activeChatId === contextMenu.chat.id) setActiveChatId(null);
+                setContextMenu(null);
               }
-              setContextMenu(null);
             }}
           >
             Удалить

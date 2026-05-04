@@ -67,6 +67,10 @@ class PersonalChatCreateIn(BaseModel):
     target_user_id: int
 
 
+class AddParticipantsIn(BaseModel):
+    participant_ids: list[int]
+
+
 class EmailAuthIn(BaseModel):
     email: str
     password: str

@@ -99,6 +99,13 @@ export function listParticipants(token: string, chatId: number): Promise<User[]>
   return request<User[]>(`/chats/${chatId}/participants`, token);
 }
 
+export function addChatParticipants(token: string, chatId: number, participantIds: number[]): Promise<{ ok: true }> {
+  return request<{ ok: true }>(`/chats/${chatId}/participants`, token, {
+    method: "POST",
+    body: JSON.stringify({ participant_ids: participantIds }),
+  });
+}
+
 export function listCommits(token: string, chatId: number): Promise<Commit[]> {
   return request<Commit[]>(`/chats/${chatId}/commits`, token);
 }

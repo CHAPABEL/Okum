@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.api.deps import get_current_user, get_github_oauth_account
 from app.db.session import get_db
 from app.models.models import Chat, ChatParticipant, Commit, Message, Repository, User
-from app.schemas.schemas import ChatCreateIn, ChatDeleteIn, MessageOut, PersonalChatCreateIn, UserOut
+from app.schemas.schemas import AddParticipantsIn, ChatCreateIn, ChatDeleteIn, MessageOut, PersonalChatCreateIn, UserOut
 from app.services.github import fetch_repository_commits
 
 router = APIRouter()
@@ -185,6 +185,44 @@ def list_participants(chat_id: int, current_user: User = Depends(get_current_use
     participant_ids.add(chat.user_id)
     participants = db.query(User).filter(User.id.in_(participant_ids)).order_by(User.username.asc()).all()
     return [UserOut.model_validate(item) for item in participants]
+
+
+@router.post("/{chat_id}/participants")
+def add_participants(
+    chat_id: int,
+    payload: AddParticipantsIn,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    chat = (
+        db.query(Chat)
+        .outerjoin(ChatParticipant, ChatParticipant.chat_id == Chat.id)
+        .filter(Chat.id == chat_id)
+        .filter((Chat.user_id == current_user.id) | (ChatParticipant.user_id == current_user.id))
+        .first()
+    )
+    if not chat:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat not found")
+    participation = (
+        db.query(ChatParticipant).filter(ChatParticipant.chat_id == chat_id, ChatParticipant.user_id == current_user.id).first()
+    )
+    if not participation and chat.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+
+    existing = {row.user_id for row in db.query(ChatParticipant).filter(ChatParticipant.chat_id == chat_id).all()}
+    existing.add(chat.user_id)
+    for uid in payload.participant_ids:
+        if uid == current_user.id:
+            continue
+        if uid in existing:
+            continue
+        target = db.get(User, uid)
+        if not target:
+            continue
+        db.add(ChatParticipant(chat_id=chat_id, user_id=uid))
+        existing.add(uid)
+    db.commit()
+    return {"ok": True}
 
 
 @router.get("/{chat_id}/commits")
