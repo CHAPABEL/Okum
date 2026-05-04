@@ -91,6 +91,10 @@ export function listMessages(token: string, chatId: number): Promise<Message[]> 
   return request<Message[]>(`/chats/${chatId}/messages`, token);
 }
 
+export function deleteMessage(token: string, chatId: number, messageId: number): Promise<{ ok: true }> {
+  return request<{ ok: true }>(`/chats/${chatId}/messages/${messageId}`, token, { method: "DELETE" });
+}
+
 export function listParticipants(token: string, chatId: number): Promise<User[]> {
   return request<User[]>(`/chats/${chatId}/participants`, token);
 }

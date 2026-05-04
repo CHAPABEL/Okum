@@ -218,12 +218,40 @@ function ChatWorkspace() {
     const [showCreateProjectModal, setShowCreateProjectModal] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [showPersonalModal, setShowPersonalModal] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [showDeleteModal, setShowDeleteModal] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [isClosingCreateModal, setIsClosingCreateModal] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [isClosingPersonalModal, setIsClosingPersonalModal] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [isClosingDeleteModal, setIsClosingDeleteModal] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [userQuery, setUserQuery] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
     const [userResults, setUserResults] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
     const [selectedUserIds, setSelectedUserIds] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
     const [selectedRepoId, setSelectedRepoId] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
+    const [includeProject, setIncludeProject] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
+    const [chatTitleInput, setChatTitleInput] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
+    const [createChatValidationError, setCreateChatValidationError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
     const [deleteTargetId, setDeleteTargetId] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
     const socketRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const MODAL_ANIM_MS = 240;
+    const closeCreateModal = ()=>{
+        setIsClosingCreateModal(true);
+        window.setTimeout(()=>{
+            setShowCreateProjectModal(false);
+            setIsClosingCreateModal(false);
+        }, MODAL_ANIM_MS);
+    };
+    const closePersonalModal = ()=>{
+        setIsClosingPersonalModal(true);
+        window.setTimeout(()=>{
+            setShowPersonalModal(false);
+            setIsClosingPersonalModal(false);
+        }, MODAL_ANIM_MS);
+    };
+    const closeDeleteModal = ()=>{
+        setIsClosingDeleteModal(true);
+        window.setTimeout(()=>{
+            setShowDeleteModal(false);
+            setIsClosingDeleteModal(false);
+        }, MODAL_ANIM_MS);
+    };
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         const url = new URL(window.location.href);
         const tokenFromQuery = url.searchParams.get("token");
@@ -378,6 +406,8 @@ function ChatWorkspace() {
     ]);
     const activeChat = chats.find((chat)=>chat.id === activeChatId) ?? null;
     const activeParticipants = activeChatId ? participantsByChat[activeChatId] ?? [] : [];
+    const createChatUserRows = Math.max(userResults.length, 1);
+    const createChatUsersHeight = createChatUserRows * 62;
     const initials = (value)=>value.split(" ").filter(Boolean).map((part)=>part[0]?.toUpperCase()).join("").slice(0, 2);
     const shorten = (value, max = 15)=>value.length > max ? `${value.slice(0, max)}...` : value;
     const formatPreview = (chat)=>{
@@ -393,10 +423,22 @@ function ChatWorkspace() {
         setNewMessage("");
     };
     const onCreateProjectChat = async ()=>{
-        if (!githubConnected || !token) return;
-        const repo = repositories.find((item)=>item.github_repo_id === selectedRepoId);
-        if (!repo) return;
-        const title = repo.full_name.split("/").at(-1) ?? repo.full_name;
+        if (!token) return;
+        if (!chatTitleInput.trim() && selectedUserIds.length === 0) {
+            setCreateChatValidationError("Введите название или пользователя");
+            return;
+        }
+        if (includeProject && (!selectedRepoId || !githubConnected)) return;
+        setCreateChatValidationError("");
+        const selectedRepo = repositories.find((item)=>item.github_repo_id === selectedRepoId);
+        const fallbackTitle = chatTitleInput.trim() || selectedRepo?.full_name.split("/").at(-1) || "chat";
+        const repo = includeProject && selectedRepo ? selectedRepo : {
+            github_repo_id: `no-project:${Date.now()}`,
+            full_name: `chat/${fallbackTitle}`,
+            html_url: "#",
+            default_branch: "none"
+        };
+        const title = fallbackTitle;
         const created = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createChat"])(token, {
             title,
             ...repo,
@@ -408,6 +450,8 @@ function ChatWorkspace() {
         setShowCreateProjectModal(false);
         setSelectedUserIds([]);
         setUserQuery("");
+        setChatTitleInput("");
+        setIncludeProject(true);
     };
     const startPersonalChat = async (targetUser)=>{
         if (!token) return;
@@ -426,7 +470,7 @@ function ChatWorkspace() {
         setActiveTab("personal");
         setActivePersonalChatId(String(chat.id));
         setActiveChatId(chat.id);
-        setShowPersonalModal(false);
+        closePersonalModal();
         setUserQuery("");
     };
     const onDeleteChat = async ()=>{
@@ -435,7 +479,7 @@ function ChatWorkspace() {
         await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["deleteChat"])(token, id);
         setChats((prev)=>prev.filter((chat)=>chat.id !== id));
         setPersonalChats((prev)=>prev.filter((chat)=>Number(chat.id) !== id));
-        setShowDeleteModal(false);
+        closeDeleteModal();
         setDeleteTargetId("");
         if (activeChatId === id) setActiveChatId(null);
     };
@@ -446,12 +490,12 @@ function ChatWorkspace() {
             children: "Auth token missing. Login first."
         }, void 0, false, {
             fileName: "[project]/components/ChatWorkspace.tsx",
-            lineNumber: 240,
+            lineNumber: 289,
             columnNumber: 54
         }, this)
     }, void 0, false, {
         fileName: "[project]/components/ChatWorkspace.tsx",
-        lineNumber: 240,
+        lineNumber: 289,
         columnNumber: 22
     }, this);
     if (loading) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
@@ -460,12 +504,12 @@ function ChatWorkspace() {
             className: "chat-loader"
         }, void 0, false, {
             fileName: "[project]/components/ChatWorkspace.tsx",
-            lineNumber: 241,
+            lineNumber: 290,
             columnNumber: 55
         }, this)
     }, void 0, false, {
         fileName: "[project]/components/ChatWorkspace.tsx",
-        lineNumber: 241,
+        lineNumber: 290,
         columnNumber: 23
     }, this);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
@@ -481,7 +525,7 @@ function ChatWorkspace() {
                                 children: "Messages"
                             }, void 0, false, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 247,
+                                lineNumber: 296,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -493,7 +537,7 @@ function ChatWorkspace() {
                                         children: "+"
                                     }, void 0, false, {
                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 249,
+                                        lineNumber: 298,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -502,22 +546,59 @@ function ChatWorkspace() {
                                             setDeleteTargetId(String(activeChatId ?? ""));
                                             setShowDeleteModal(true);
                                         },
-                                        children: "🗑"
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                                            xmlns: "http://www.w3.org/2000/svg",
+                                            width: "14",
+                                            height: "14",
+                                            viewBox: "0 0 24 24",
+                                            fill: "none",
+                                            stroke: "currentColor",
+                                            strokeWidth: "2",
+                                            strokeLinecap: "round",
+                                            strokeLinejoin: "round",
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                                    d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/components/ChatWorkspace.tsx",
+                                                    lineNumber: 313,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                                    d: "M3 6h18"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/components/ChatWorkspace.tsx",
+                                                    lineNumber: 314,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                                    d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/components/ChatWorkspace.tsx",
+                                                    lineNumber: 315,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/components/ChatWorkspace.tsx",
+                                            lineNumber: 302,
+                                            columnNumber: 15
+                                        }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 252,
+                                        lineNumber: 301,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 248,
+                                lineNumber: 297,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ChatWorkspace.tsx",
-                        lineNumber: 246,
+                        lineNumber: 295,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -528,12 +609,12 @@ function ChatWorkspace() {
                             onChange: (e)=>setChatSearchQuery(e.target.value)
                         }, void 0, false, {
                             fileName: "[project]/components/ChatWorkspace.tsx",
-                            lineNumber: 258,
+                            lineNumber: 321,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/ChatWorkspace.tsx",
-                        lineNumber: 257,
+                        lineNumber: 320,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -545,7 +626,7 @@ function ChatWorkspace() {
                                 children: "Projects"
                             }, void 0, false, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 261,
+                                lineNumber: 324,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -554,13 +635,13 @@ function ChatWorkspace() {
                                 children: "Personal"
                             }, void 0, false, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 262,
+                                lineNumber: 325,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ChatWorkspace.tsx",
-                        lineNumber: 260,
+                        lineNumber: 323,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -577,7 +658,7 @@ function ChatWorkspace() {
                                                 children: initials(chat.title)
                                             }, void 0, false, {
                                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                                lineNumber: 268,
+                                                lineNumber: 331,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -587,31 +668,31 @@ function ChatWorkspace() {
                                                         children: shorten(chat.title, 15)
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                                        lineNumber: 270,
+                                                        lineNumber: 333,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                         children: formatPreview(chat)
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                                        lineNumber: 271,
+                                                        lineNumber: 334,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                                lineNumber: 269,
+                                                lineNumber: 332,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 267,
+                                        lineNumber: 330,
                                         columnNumber: 15
                                     }, this)
                                 }, chat.id, false, {
                                     fileName: "[project]/components/ChatWorkspace.tsx",
-                                    lineNumber: 266,
+                                    lineNumber: 329,
                                     columnNumber: 13
                                 }, this)),
                             activeTab === "projects" && filteredProjectChats.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -619,7 +700,7 @@ function ChatWorkspace() {
                                 children: "Таких чатов нет"
                             }, void 0, false, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 276,
+                                lineNumber: 339,
                                 columnNumber: 77
                             }, this),
                             activeTab === "personal" && filteredPersonalChats.map((chat)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -636,7 +717,7 @@ function ChatWorkspace() {
                                                 children: initials(chat.user.username)
                                             }, void 0, false, {
                                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                                lineNumber: 281,
+                                                lineNumber: 344,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -646,31 +727,31 @@ function ChatWorkspace() {
                                                         children: shorten(chat.user.username, 15)
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                                        lineNumber: 283,
+                                                        lineNumber: 346,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                         children: lastMessageByChat[Number(chat.id)] ?? "Start personal conversation"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                                        lineNumber: 284,
+                                                        lineNumber: 347,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                                lineNumber: 282,
+                                                lineNumber: 345,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 280,
+                                        lineNumber: 343,
                                         columnNumber: 15
                                     }, this)
                                 }, chat.id, false, {
                                     fileName: "[project]/components/ChatWorkspace.tsx",
-                                    lineNumber: 279,
+                                    lineNumber: 342,
                                     columnNumber: 13
                                 }, this)),
                             activeTab === "personal" && filteredPersonalChats.length === 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -678,7 +759,7 @@ function ChatWorkspace() {
                                 children: "Таких чатов нет"
                             }, void 0, false, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 289,
+                                lineNumber: 352,
                                 columnNumber: 78
                             }, this),
                             activeTab === "projects" && !githubConnected && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("a", {
@@ -694,37 +775,86 @@ function ChatWorkspace() {
                                             d: "M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.32c-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.89-1.16-.89-1.16-.73-.5.05-.49.05-.49.8.06 1.22.82 1.22.82.72 1.2 1.87.86 2.33.66.07-.52.28-.86.5-1.06-1.77-.2-3.63-.88-3.63-3.95 0-.88.31-1.6.82-2.16-.08-.2-.36-1 .08-2.08 0 0 .67-.22 2.2.82a7.48 7.48 0 0 1 4 0c1.52-1.04 2.2-.82 2.2-.82.44 1.08.16 1.88.08 2.08.5.56.82 1.28.82 2.16 0 3.08-1.86 3.74-3.64 3.94.28.24.54.72.54 1.46v2.16c0 .21.14.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"
                                         }, void 0, false, {
                                             fileName: "[project]/components/ChatWorkspace.tsx",
-                                            lineNumber: 293,
+                                            lineNumber: 356,
                                             columnNumber: 83
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 293,
+                                        lineNumber: 356,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                         children: "Привязать GitHub"
                                     }, void 0, false, {
                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 294,
+                                        lineNumber: 357,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 292,
+                                lineNumber: 355,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ChatWorkspace.tsx",
-                        lineNumber: 264,
+                        lineNumber: 327,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "sidebar-bottom-actions",
+                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
+                            href: "/settings",
+                            className: "compose-icon-btn settings-link",
+                            title: "Settings",
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                                xmlns: "http://www.w3.org/2000/svg",
+                                width: "16",
+                                height: "16",
+                                viewBox: "0 0 24 24",
+                                fill: "none",
+                                stroke: "currentColor",
+                                strokeWidth: "2",
+                                strokeLinecap: "round",
+                                strokeLinejoin: "round",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                        d: "M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/ChatWorkspace.tsx",
+                                        lineNumber: 374,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("circle", {
+                                        cx: "12",
+                                        cy: "12",
+                                        r: "3"
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/ChatWorkspace.tsx",
+                                        lineNumber: 375,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/components/ChatWorkspace.tsx",
+                                lineNumber: 363,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "[project]/components/ChatWorkspace.tsx",
+                            lineNumber: 362,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "[project]/components/ChatWorkspace.tsx",
+                        lineNumber: 361,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/ChatWorkspace.tsx",
-                lineNumber: 245,
+                lineNumber: 294,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("section", {
@@ -739,35 +869,37 @@ function ChatWorkspace() {
                                         children: activeChat?.title ?? "No chat selected"
                                     }, void 0, false, {
                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 303,
+                                        lineNumber: 384,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                         children: "● Active now"
                                     }, void 0, false, {
                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 304,
+                                        lineNumber: 385,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 302,
+                                lineNumber: 383,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "topbar-icons",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        type: "button",
                                         className: "icon-btn",
                                         onClick: ()=>activeTab === "projects" ? setShowCreateProjectModal(true) : setShowPersonalModal(true),
                                         children: "+"
                                     }, void 0, false, {
                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 307,
+                                        lineNumber: 388,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        type: "button",
                                         className: "icon-btn",
                                         onClick: ()=>setIsRightPanelVisible((prev)=>!prev),
                                         title: isRightPanelVisible ? "Hide right panel" : "Show right panel",
@@ -780,29 +912,29 @@ function ChatWorkspace() {
                                                 d: "M3 3h10v10H3zM2 2v12h12V2z"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                                lineNumber: 309,
+                                                lineNumber: 390,
                                                 columnNumber: 83
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/components/ChatWorkspace.tsx",
-                                            lineNumber: 309,
+                                            lineNumber: 390,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 308,
+                                        lineNumber: 389,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 306,
+                                lineNumber: 387,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ChatWorkspace.tsx",
-                        lineNumber: 301,
+                        lineNumber: 382,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -814,7 +946,7 @@ function ChatWorkspace() {
                                         children: message.content
                                     }, void 0, false, {
                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 317,
+                                        lineNumber: 398,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("time", {
@@ -824,18 +956,18 @@ function ChatWorkspace() {
                                         })
                                     }, void 0, false, {
                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 318,
+                                        lineNumber: 399,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, message.id, true, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 316,
+                                lineNumber: 397,
                                 columnNumber: 13
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/components/ChatWorkspace.tsx",
-                        lineNumber: 314,
+                        lineNumber: 395,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("footer", {
@@ -854,7 +986,7 @@ function ChatWorkspace() {
                                 }
                             }, void 0, false, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 323,
+                                lineNumber: 404,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -863,23 +995,23 @@ function ChatWorkspace() {
                                 children: "➤"
                             }, void 0, false, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 324,
+                                lineNumber: 405,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ChatWorkspace.tsx",
-                        lineNumber: 322,
+                        lineNumber: 403,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/ChatWorkspace.tsx",
-                lineNumber: 300,
+                lineNumber: 381,
                 columnNumber: 7
             }, this),
-            isRightPanelVisible && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("aside", {
-                className: "col right messenger-profile",
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("aside", {
+                className: `col right messenger-profile ${isRightPanelVisible ? "panel-open" : "panel-closed"}`,
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "profile-card",
@@ -889,61 +1021,27 @@ function ChatWorkspace() {
                                 children: initials(user?.username ?? "U")
                             }, void 0, false, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 331,
+                                lineNumber: 411,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
                                 children: user?.username ?? "User"
                             }, void 0, false, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 332,
+                                lineNumber: 412,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                 children: "Senior Backend Engineer"
                             }, void 0, false, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 333,
-                                columnNumber: 13
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "profile-actions",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                        className: "profile-btn",
-                                        children: "Profile"
-                                    }, void 0, false, {
-                                        fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 335,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                        className: "profile-btn",
-                                        children: "Search"
-                                    }, void 0, false, {
-                                        fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 336,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
-                                        href: "/settings",
-                                        className: "profile-btn",
-                                        children: "Settings"
-                                    }, void 0, false, {
-                                        fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 337,
-                                        columnNumber: 15
-                                    }, this)
-                                ]
-                            }, void 0, true, {
-                                fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 334,
+                                lineNumber: 413,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ChatWorkspace.tsx",
-                        lineNumber: 330,
+                        lineNumber: 410,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -955,12 +1053,12 @@ function ChatWorkspace() {
                                     children: "RECENT ACTIVITY"
                                 }, void 0, false, {
                                     fileName: "[project]/components/ChatWorkspace.tsx",
-                                    lineNumber: 341,
+                                    lineNumber: 416,
                                     columnNumber: 44
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 341,
+                                lineNumber: 416,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -975,7 +1073,7 @@ function ChatWorkspace() {
                                                 className: `activity-dot dot-${index % 3}`
                                             }, void 0, false, {
                                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                                lineNumber: 345,
+                                                lineNumber: 420,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -987,31 +1085,31 @@ function ChatWorkspace() {
                                                         })
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                                        lineNumber: 347,
+                                                        lineNumber: 422,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                         children: commit.message.split("\n")[0]
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                                        lineNumber: 348,
+                                                        lineNumber: 423,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                                lineNumber: 346,
+                                                lineNumber: 421,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, commit.sha, true, {
                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 344,
+                                        lineNumber: 419,
                                         columnNumber: 17
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 342,
+                                lineNumber: 417,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1021,7 +1119,7 @@ function ChatWorkspace() {
                                         children: "PARTICIPANTS"
                                     }, void 0, false, {
                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 354,
+                                        lineNumber: 429,
                                         columnNumber: 15
                                     }, this),
                                     activeParticipants.map((member)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1032,7 +1130,7 @@ function ChatWorkspace() {
                                                     children: initials(member.username)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/ChatWorkspace.tsx",
-                                                    lineNumber: 357,
+                                                    lineNumber: 432,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1041,171 +1139,320 @@ function ChatWorkspace() {
                                                             children: member.username
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/ChatWorkspace.tsx",
-                                                            lineNumber: 358,
+                                                            lineNumber: 433,
                                                             columnNumber: 24
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                             children: member.email
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/ChatWorkspace.tsx",
-                                                            lineNumber: 358,
+                                                            lineNumber: 433,
                                                             columnNumber: 58
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/ChatWorkspace.tsx",
-                                                    lineNumber: 358,
+                                                    lineNumber: 433,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, member.id, true, {
                                             fileName: "[project]/components/ChatWorkspace.tsx",
-                                            lineNumber: 356,
+                                            lineNumber: 431,
                                             columnNumber: 17
                                         }, this))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 353,
+                                lineNumber: 428,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ChatWorkspace.tsx",
-                        lineNumber: 340,
+                        lineNumber: 415,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/ChatWorkspace.tsx",
-                lineNumber: 329,
-                columnNumber: 9
+                lineNumber: 409,
+                columnNumber: 7
             }, this),
             showCreateProjectModal && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "modal-overlay",
-                onClick: ()=>setShowCreateProjectModal(false),
+                className: `modal-overlay ${isClosingCreateModal ? "closing" : ""}`,
+                onClick: closeCreateModal,
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                    className: "add-user-modal",
+                    className: "add-user-modal create-chat-modal",
                     onClick: (e)=>e.stopPropagation(),
-                    children: [
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "modal-container",
-                            children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                    className: "modal-title",
-                                    children: "Добавить проект"
-                                }, void 0, false, {
-                                    fileName: "[project]/components/ChatWorkspace.tsx",
-                                    lineNumber: 370,
-                                    columnNumber: 15
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
-                                    className: "field",
-                                    value: selectedRepoId,
-                                    onChange: (e)=>setSelectedRepoId(e.target.value),
-                                    children: repositories.map((repo)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                            value: repo.github_repo_id,
-                                            children: repo.full_name
-                                        }, repo.github_repo_id, false, {
-                                            fileName: "[project]/components/ChatWorkspace.tsx",
-                                            lineNumber: 372,
-                                            columnNumber: 45
-                                        }, this))
-                                }, void 0, false, {
-                                    fileName: "[project]/components/ChatWorkspace.tsx",
-                                    lineNumber: 371,
-                                    columnNumber: 15
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                                    className: "field",
-                                    placeholder: "Search user by username/email...",
+                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "modal-container create-chat-form",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "modal-title",
+                                children: "Создать чат"
+                            }, void 0, false, {
+                                fileName: "[project]/components/ChatWorkspace.tsx",
+                                lineNumber: 444,
+                                columnNumber: 15
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                className: `field modal-project-select ${createChatValidationError ? "error-field" : ""}`,
+                                placeholder: "Название чата...",
+                                value: chatTitleInput,
+                                onChange: (e)=>{
+                                    setChatTitleInput(e.target.value);
+                                    if (createChatValidationError) setCreateChatValidationError("");
+                                }
+                            }, void 0, false, {
+                                fileName: "[project]/components/ChatWorkspace.tsx",
+                                lineNumber: 445,
+                                columnNumber: 15
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: `sidebar-search modal-search ${createChatValidationError ? "error-field" : ""}`,
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                    placeholder: "Поиск пользователей...",
                                     value: userQuery,
                                     onChange: (e)=>setUserQuery(e.target.value)
                                 }, void 0, false, {
                                     fileName: "[project]/components/ChatWorkspace.tsx",
-                                    lineNumber: 374,
-                                    columnNumber: 15
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                    className: "btn primary",
-                                    onClick: onCreateProjectChat,
-                                    disabled: !selectedRepoId || !githubConnected,
-                                    children: "Добавить"
-                                }, void 0, false, {
-                                    fileName: "[project]/components/ChatWorkspace.tsx",
-                                    lineNumber: 375,
-                                    columnNumber: 15
+                                    lineNumber: 455,
+                                    columnNumber: 17
                                 }, this)
-                            ]
-                        }, void 0, true, {
-                            fileName: "[project]/components/ChatWorkspace.tsx",
-                            lineNumber: 369,
-                            columnNumber: 13
-                        }, this),
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "modal-container users",
-                            children: userResults.map((foundUser)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                    className: `add-user-item ${selectedUserIds.includes(foundUser.id) ? "selected" : ""}`,
-                                    onClick: ()=>setSelectedUserIds((prev)=>prev.includes(foundUser.id) ? prev.filter((id)=>id !== foundUser.id) : [
-                                                ...prev,
-                                                foundUser.id
-                                            ]),
-                                    children: [
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                            className: "conversation-avatar",
-                                            children: initials(foundUser.username)
-                                        }, void 0, false, {
-                                            fileName: "[project]/components/ChatWorkspace.tsx",
-                                            lineNumber: 380,
-                                            columnNumber: 19
-                                        }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            }, void 0, false, {
+                                fileName: "[project]/components/ChatWorkspace.tsx",
+                                lineNumber: 454,
+                                columnNumber: 15
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "modal-container users create-chat-users",
+                                style: {
+                                    height: `${createChatUsersHeight}px`
+                                },
+                                children: [
+                                    userResults.map((foundUser)=>{
+                                        const selected = selectedUserIds.includes(foundUser.id);
+                                        return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                            className: `add-user-item ${selected ? "selected" : ""}`,
+                                            onClick: ()=>setSelectedUserIds((prev)=>prev.includes(foundUser.id) ? prev.filter((id)=>id !== foundUser.id) : [
+                                                        ...prev,
+                                                        foundUser.id
+                                                    ]),
                                             children: [
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("strong", {
-                                                    children: foundUser.username
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                    className: "conversation-avatar",
+                                                    children: initials(foundUser.username)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/ChatWorkspace.tsx",
-                                                    lineNumber: 381,
-                                                    columnNumber: 24
+                                                    lineNumber: 476,
+                                                    columnNumber: 23
                                                 }, this),
-                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                    children: foundUser.email
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    children: [
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("strong", {
+                                                            children: foundUser.username
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/components/ChatWorkspace.tsx",
+                                                            lineNumber: 478,
+                                                            columnNumber: 25
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                            children: foundUser.email
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/components/ChatWorkspace.tsx",
+                                                            lineNumber: 479,
+                                                            columnNumber: 25
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "[project]/components/ChatWorkspace.tsx",
+                                                    lineNumber: 477,
+                                                    columnNumber: 23
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                    className: `user-pick-check ${selected ? "active" : ""}`,
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                                                        xmlns: "http://www.w3.org/2000/svg",
+                                                        width: "16",
+                                                        height: "16",
+                                                        viewBox: "0 0 24 24",
+                                                        fill: "none",
+                                                        stroke: "currentColor",
+                                                        strokeWidth: "2",
+                                                        strokeLinecap: "round",
+                                                        strokeLinejoin: "round",
+                                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                                            d: "M20 6 9 17l-5-5"
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/components/ChatWorkspace.tsx",
+                                                            lineNumber: 493,
+                                                            columnNumber: 27
+                                                        }, this)
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/components/ChatWorkspace.tsx",
+                                                        lineNumber: 482,
+                                                        columnNumber: 25
+                                                    }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/ChatWorkspace.tsx",
-                                                    lineNumber: 381,
-                                                    columnNumber: 61
+                                                    lineNumber: 481,
+                                                    columnNumber: 23
                                                 }, this)
                                             ]
-                                        }, void 0, true, {
+                                        }, foundUser.id, true, {
                                             fileName: "[project]/components/ChatWorkspace.tsx",
-                                            lineNumber: 381,
+                                            lineNumber: 465,
+                                            columnNumber: 21
+                                        }, this);
+                                    }),
+                                    userResults.length === 0 && userQuery.trim().length < 2 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "muted small create-chat-empty",
+                                        children: "Выберите пользователя"
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/ChatWorkspace.tsx",
+                                        lineNumber: 500,
+                                        columnNumber: 19
+                                    }, this),
+                                    userResults.length === 0 && userQuery.trim().length >= 2 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "muted small create-chat-empty",
+                                        children: "Нет таких пользователей"
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/ChatWorkspace.tsx",
+                                        lineNumber: 503,
+                                        columnNumber: 19
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/components/ChatWorkspace.tsx",
+                                lineNumber: 461,
+                                columnNumber: 15
+                            }, this),
+                            createChatValidationError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "create-chat-validation",
+                                children: createChatValidationError
+                            }, void 0, false, {
+                                fileName: "[project]/components/ChatWorkspace.tsx",
+                                lineNumber: 506,
+                                columnNumber: 45
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                className: `project-toggle ${includeProject ? "active" : ""}`,
+                                onClick: ()=>setIncludeProject((prev)=>!prev),
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        children: "Добавить проект"
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/ChatWorkspace.tsx",
+                                        lineNumber: 511,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                        className: `user-pick-check ${includeProject ? "active" : ""}`,
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                                            xmlns: "http://www.w3.org/2000/svg",
+                                            width: "16",
+                                            height: "16",
+                                            viewBox: "0 0 24 24",
+                                            fill: "none",
+                                            stroke: "currentColor",
+                                            strokeWidth: "2",
+                                            strokeLinecap: "round",
+                                            strokeLinejoin: "round",
+                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                                d: "M20 6 9 17l-5-5"
+                                            }, void 0, false, {
+                                                fileName: "[project]/components/ChatWorkspace.tsx",
+                                                lineNumber: 524,
+                                                columnNumber: 21
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "[project]/components/ChatWorkspace.tsx",
+                                            lineNumber: 513,
                                             columnNumber: 19
                                         }, this)
-                                    ]
-                                }, foundUser.id, true, {
-                                    fileName: "[project]/components/ChatWorkspace.tsx",
-                                    lineNumber: 379,
-                                    columnNumber: 17
-                                }, this))
-                        }, void 0, false, {
-                            fileName: "[project]/components/ChatWorkspace.tsx",
-                            lineNumber: 377,
-                            columnNumber: 13
-                        }, this)
-                    ]
-                }, void 0, true, {
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/ChatWorkspace.tsx",
+                                        lineNumber: 512,
+                                        columnNumber: 17
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/components/ChatWorkspace.tsx",
+                                lineNumber: 507,
+                                columnNumber: 15
+                            }, this),
+                            includeProject && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
+                                className: "field modal-project-select",
+                                value: selectedRepoId,
+                                onChange: (e)=>setSelectedRepoId(e.target.value),
+                                children: repositories.map((repo)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
+                                        value: repo.github_repo_id,
+                                        children: repo.full_name
+                                    }, repo.github_repo_id, false, {
+                                        fileName: "[project]/components/ChatWorkspace.tsx",
+                                        lineNumber: 531,
+                                        columnNumber: 21
+                                    }, this))
+                            }, void 0, false, {
+                                fileName: "[project]/components/ChatWorkspace.tsx",
+                                lineNumber: 529,
+                                columnNumber: 17
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "create-chat-actions",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        className: "btn primary create-chat-btn",
+                                        onClick: onCreateProjectChat,
+                                        disabled: includeProject && (!selectedRepoId || !githubConnected),
+                                        children: "Создать"
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/ChatWorkspace.tsx",
+                                        lineNumber: 538,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        className: "btn ghost create-chat-btn",
+                                        onClick: ()=>{
+                                            closeCreateModal();
+                                            setSelectedUserIds([]);
+                                            setUserQuery("");
+                                            setChatTitleInput("");
+                                            setCreateChatValidationError("");
+                                            setIncludeProject(true);
+                                        },
+                                        children: "Отмена"
+                                    }, void 0, false, {
+                                        fileName: "[project]/components/ChatWorkspace.tsx",
+                                        lineNumber: 545,
+                                        columnNumber: 17
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/components/ChatWorkspace.tsx",
+                                lineNumber: 537,
+                                columnNumber: 15
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/components/ChatWorkspace.tsx",
+                        lineNumber: 443,
+                        columnNumber: 13
+                    }, this)
+                }, void 0, false, {
                     fileName: "[project]/components/ChatWorkspace.tsx",
-                    lineNumber: 368,
+                    lineNumber: 442,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/ChatWorkspace.tsx",
-                lineNumber: 367,
+                lineNumber: 441,
                 columnNumber: 9
             }, this),
             showPersonalModal && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "modal-overlay",
-                onClick: ()=>setShowPersonalModal(false),
+                className: `modal-overlay ${isClosingPersonalModal ? "closing" : ""}`,
+                onClick: closePersonalModal,
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "add-user-modal",
                     onClick: (e)=>e.stopPropagation(),
@@ -1218,7 +1465,7 @@ function ChatWorkspace() {
                                     children: "Личные сообщения"
                                 }, void 0, false, {
                                     fileName: "[project]/components/ChatWorkspace.tsx",
-                                    lineNumber: 393,
+                                    lineNumber: 568,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1228,13 +1475,13 @@ function ChatWorkspace() {
                                     onChange: (e)=>setUserQuery(e.target.value)
                                 }, void 0, false, {
                                     fileName: "[project]/components/ChatWorkspace.tsx",
-                                    lineNumber: 394,
+                                    lineNumber: 569,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/ChatWorkspace.tsx",
-                            lineNumber: 392,
+                            lineNumber: 567,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1248,7 +1495,7 @@ function ChatWorkspace() {
                                             children: initials(foundUser.username)
                                         }, void 0, false, {
                                             fileName: "[project]/components/ChatWorkspace.tsx",
-                                            lineNumber: 399,
+                                            lineNumber: 574,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1257,47 +1504,47 @@ function ChatWorkspace() {
                                                     children: foundUser.username
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/ChatWorkspace.tsx",
-                                                    lineNumber: 400,
+                                                    lineNumber: 575,
                                                     columnNumber: 24
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                     children: foundUser.email
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/ChatWorkspace.tsx",
-                                                    lineNumber: 400,
+                                                    lineNumber: 575,
                                                     columnNumber: 61
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/ChatWorkspace.tsx",
-                                            lineNumber: 400,
+                                            lineNumber: 575,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, foundUser.id, true, {
                                     fileName: "[project]/components/ChatWorkspace.tsx",
-                                    lineNumber: 398,
+                                    lineNumber: 573,
                                     columnNumber: 17
                                 }, this))
                         }, void 0, false, {
                             fileName: "[project]/components/ChatWorkspace.tsx",
-                            lineNumber: 396,
+                            lineNumber: 571,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/ChatWorkspace.tsx",
-                    lineNumber: 391,
+                    lineNumber: 566,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/ChatWorkspace.tsx",
-                lineNumber: 390,
+                lineNumber: 565,
                 columnNumber: 9
             }, this),
             showDeleteModal && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                className: "modal-overlay",
-                onClick: ()=>setShowDeleteModal(false),
+                className: `modal-overlay ${isClosingDeleteModal ? "closing" : ""}`,
+                onClick: closeDeleteModal,
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "add-user-modal",
                     onClick: (e)=>e.stopPropagation(),
@@ -1309,7 +1556,7 @@ function ChatWorkspace() {
                                 children: "Удалить чат"
                             }, void 0, false, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 412,
+                                lineNumber: 587,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -1321,12 +1568,12 @@ function ChatWorkspace() {
                                         children: chat.title
                                     }, chat.id, false, {
                                         fileName: "[project]/components/ChatWorkspace.tsx",
-                                        lineNumber: 414,
+                                        lineNumber: 589,
                                         columnNumber: 38
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 413,
+                                lineNumber: 588,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1336,23 +1583,23 @@ function ChatWorkspace() {
                                 children: "Удалить"
                             }, void 0, false, {
                                 fileName: "[project]/components/ChatWorkspace.tsx",
-                                lineNumber: 416,
+                                lineNumber: 591,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ChatWorkspace.tsx",
-                        lineNumber: 411,
+                        lineNumber: 586,
                         columnNumber: 13
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/components/ChatWorkspace.tsx",
-                    lineNumber: 410,
+                    lineNumber: 585,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/ChatWorkspace.tsx",
-                lineNumber: 409,
+                lineNumber: 584,
                 columnNumber: 9
             }, this),
             error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1360,13 +1607,13 @@ function ChatWorkspace() {
                 children: error
             }, void 0, false, {
                 fileName: "[project]/components/ChatWorkspace.tsx",
-                lineNumber: 421,
+                lineNumber: 596,
                 columnNumber: 17
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/ChatWorkspace.tsx",
-        lineNumber: 244,
+        lineNumber: 293,
         columnNumber: 5
     }, this);
 }

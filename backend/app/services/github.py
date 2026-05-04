@@ -17,7 +17,13 @@ async def exchange_code_for_token(code: str) -> str:
             timeout=20,
         )
         response.raise_for_status()
-        return response.json()["access_token"]
+        data = response.json()
+        token = data.get("access_token")
+        if not token:
+            err = data.get("error", "oauth_error")
+            desc = data.get("error_description", "")
+            raise RuntimeError(f"GitHub token exchange failed: {err} {desc}".strip())
+        return token
 
 
 async def fetch_user(access_token: str) -> dict:

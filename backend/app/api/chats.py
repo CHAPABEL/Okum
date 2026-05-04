@@ -138,6 +138,36 @@ def list_messages(chat_id: int, current_user: User = Depends(get_current_user), 
     return [MessageOut.model_validate(msg) for msg in messages]
 
 
+@router.delete("/{chat_id}/messages/{message_id}")
+def delete_message(message_id: int, chat_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    chat = (
+        db.query(Chat)
+        .outerjoin(ChatParticipant, ChatParticipant.chat_id == Chat.id)
+        .filter(Chat.id == chat_id)
+        .filter((Chat.user_id == current_user.id) | (ChatParticipant.user_id == current_user.id))
+        .first()
+    )
+    if not chat:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat not found")
+
+    message = db.query(Message).filter(Message.id == message_id, Message.chat_id == chat_id).first()
+    if not message:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Message not found")
+
+    # Any chat participant can moderate/delete a message from this chat.
+    participation = (
+        db.query(ChatParticipant)
+        .filter(ChatParticipant.chat_id == chat_id, ChatParticipant.user_id == current_user.id)
+        .first()
+    )
+    if not participation and chat.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+
+    db.delete(message)
+    db.commit()
+    return {"ok": True}
+
+
 @router.get("/{chat_id}/participants", response_model=list[UserOut])
 def list_participants(chat_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     chat = (

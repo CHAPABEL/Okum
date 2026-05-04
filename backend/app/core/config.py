@@ -1,9 +1,21 @@
+from pathlib import Path
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# backend/app/core/config.py -> parents[2] == backend/, parent == repo root (Okum/)
+_BACKEND_DIR = Path(__file__).resolve().parents[2]
+_REPO_ROOT = _BACKEND_DIR.parent
+_ENV_FILES = tuple(p for p in (_REPO_ROOT / ".env", _BACKEND_DIR / ".env") if p.is_file())
+
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    # Repo-root .env is used by docker-compose; cwd-only ".env" misses it when uvicorn runs from backend/.
+    model_config = SettingsConfigDict(
+        env_file=_ENV_FILES if _ENV_FILES else (".env",),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     db_url: str = Field(alias="DB_URL")
     secret_key: str = Field(alias="SECRET_KEY")

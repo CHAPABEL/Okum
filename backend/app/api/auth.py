@@ -14,6 +14,11 @@ router = APIRouter()
 
 @router.get("/github")
 def github_login():
+    if not settings.github_client_id.strip() or not settings.github_client_secret.strip():
+        raise HTTPException(
+            status_code=503,
+            detail="GitHub OAuth is not configured: set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET in .env",
+        )
     scope = "read:user user:email repo"
     url = (
         "https://github.com/login/oauth/authorize"
@@ -24,7 +29,10 @@ def github_login():
 
 @router.get("/callback")
 async def github_callback(code: str, db: Session = Depends(get_db)):
-    access_token = await exchange_code_for_token(code)
+    try:
+        access_token = await exchange_code_for_token(code)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     gh_user = await fetch_user(access_token)
 
     user = db.query(User).filter(User.email == gh_user["email"]).first()
