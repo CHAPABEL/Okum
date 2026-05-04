@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/chappa/Desktop/Okum/frontend/app/chat/loading.tsx"],"sourcesContent":["export default function ChatLoading() {\n  return (\n    <main className=\"center-screen\">\n      <div className=\"chat-loader\" aria-label=\"Loading chat\" />\n    </main>\n  );\n}\n"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACtB,qBACE,8OAAC;QAAK,WAAU;kBACd,cAAA,8OAAC;YAAI,WAAU;YAAc,cAAW;;;;;;;;;;;AAG9C"}}]
+}
