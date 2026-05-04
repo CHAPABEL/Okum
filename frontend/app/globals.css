@@ -1166,6 +1166,7 @@ a {
   max-width: max-content;
   display: flex;
   border-radius: 12px;
+  border-bottom-left-radius: 0px;
   background: #1f232c;
   align-items: flex-end;
   gap: 10px;
@@ -1200,6 +1201,9 @@ a {
   margin-left: auto;
   background: var(--accent);
   border-color: var(--accent);
+  border-bottom-right-radius: 0px;
+  border-radius: 12px;
+  border-bottom-right-radius: 0px;
   color: #ffffff;
 }
 
@@ -1208,6 +1212,25 @@ a {
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+.message-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.message-item.own {
+  align-self: flex-end;
+}
+
+.message-author {
+  margin-bottom: 2px;
+  transform: translateY(-2px);
+  line-height: 1;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #8f9bb3;
 }
 
 .message-bubble time {
@@ -2034,6 +2057,10 @@ a {
   color: #65748b;
 }
 
+:root[data-theme="light"] .message-author {
+  color: #64748b;
+}
+
 :root[data-theme="light"] .message-bubble.own time {
   color: #ffffff;
 }
@@ -2102,7 +2129,153 @@ a {
   max-width: 1080px;
   margin: 0.75rem auto 0;
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.settings-logout-btn {
+  margin-top: 0.35rem;
+  border: 1px solid color-mix(in srgb, #ef4444 45%, transparent);
+  background: color-mix(in srgb, #ef4444 12%, #111520);
+  color: #f3b4b8;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.settings-logout-btn:hover {
+  transform: scale(1.02);
+  border-color: color-mix(in srgb, #ef4444 70%, transparent);
+  background: color-mix(in srgb, #ef4444 22%, #111520);
+}
+
+:root[data-theme="light"] .settings-logout-btn {
+  background: color-mix(in srgb, #ef4444 10%, #ffffff);
+  color: #b91c1c;
+  border-color: color-mix(in srgb, #ef4444 35%, #cfd5df);
+}
+
+:root[data-theme="light"] .settings-logout-btn:hover {
+  background: color-mix(in srgb, #ef4444 16%, #ffffff);
+  border-color: #ef4444;
+}
+
+.admin-shell {
+  min-height: 100vh;
+  padding: 1rem;
+  background: #07070a;
+  color: #e8ecf8;
+}
+
+.admin-header {
+  max-width: 1080px;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-header h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.admin-stats {
+  max-width: 1080px;
+  margin: 0 auto 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-stat-card {
+  border: 1px solid #1c2130;
+  border-radius: 12px;
+  background: #111520;
+  padding: 0.85rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.admin-stat-card span {
+  color: #8f9bb3;
+  font-size: 0.86rem;
+}
+
+.admin-stat-card strong {
+  font-size: 1.35rem;
+}
+
+.admin-users {
+  max-width: 1080px;
+  margin: 0 auto;
+  border: 1px solid #1c2130;
+  border-radius: 12px;
+  background: #111520;
+  padding: 0.85rem;
+}
+
+.admin-users h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.admin-users-table-wrap {
+  overflow: auto;
+}
+
+.admin-users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-users-table th,
+.admin-users-table td {
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid #1f2635;
+  text-align: left;
+}
+
+.admin-users-table th {
+  color: #9aa8c2;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-delete-btn {
+  border: 1px solid color-mix(in srgb, #ef4444 45%, transparent);
+  background: color-mix(in srgb, #ef4444 12%, #111520);
+  color: #f3b4b8;
+}
+
+.admin-delete-btn:hover:not(:disabled) {
+  border-color: color-mix(in srgb, #ef4444 70%, transparent);
+  background: color-mix(in srgb, #ef4444 22%, #111520);
+}
+
+:root[data-theme="light"] .admin-shell {
+  background: #f6f9ff;
+  color: #1b2331;
+}
+
+:root[data-theme="light"] .admin-stat-card,
+:root[data-theme="light"] .admin-users {
+  background: #ffffff;
+  border-color: #d5dced;
+}
+
+:root[data-theme="light"] .admin-stat-card span,
+:root[data-theme="light"] .admin-users-table th {
+  color: #60708a;
+}
+
+:root[data-theme="light"] .admin-users-table th,
+:root[data-theme="light"] .admin-users-table td {
+  border-bottom-color: #e2e8f3;
 }
 
 .settings-col-left,

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { AccentColorPicker } from "@/components/settings/AccentColorPicker";
 import { EnvironmentSelector } from "@/components/settings/EnvironmentSelector";
 import { IdentityCard } from "@/components/settings/IdentityCard";
+import { clearToken } from "@/lib/auth";
 
 export function SettingsPage() {
   const router = useRouter();
@@ -68,6 +69,17 @@ export function SettingsPage() {
       </div>
       <div className="settings-save-outside">
         <button
+          type="button"
+          className="btn settings-logout-btn"
+          onClick={() => {
+            clearToken();
+            router.push("/login");
+          }}
+        >
+          Выйти
+        </button>
+        <button
+          type="button"
           className="btn settings-save-btn"
           onClick={() => {
             localStorage.setItem("flow_username", username);

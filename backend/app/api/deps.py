@@ -1,6 +1,7 @@
 from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.security import decode_access_token
 from app.db.session import get_db
 from app.models.models import OAuthAccount, User
@@ -23,3 +24,10 @@ def get_current_user(authorization: str = Header(default=""), db: Session = Depe
 
 def get_github_oauth_account(db: Session, user_id: int) -> OAuthAccount | None:
     return db.query(OAuthAccount).filter(OAuthAccount.user_id == user_id, OAuthAccount.provider == "github").first()
+
+
+def get_admin_user(current_user: User = Depends(get_current_user)) -> User:
+    admin_email = settings.admin_email.strip().lower()
+    if not admin_email or current_user.email.lower() != admin_email:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+    return current_user

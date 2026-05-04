@@ -318,6 +318,10 @@ export function ChatWorkspace() {
 
   const initials = (value: string) => value.split(" ").filter(Boolean).map((part) => part[0]?.toUpperCase()).join("").slice(0, 2);
   const shorten = (value: string, max = 15) => (value.length > max ? `${value.slice(0, max)}...` : value);
+  const getMessageAuthorName = (message: Message) => {
+    const author = activeParticipants.find((member) => member.id === message.user_id);
+    return author?.username ?? "Unknown user";
+  };
   const formatPreview = (chat: Chat) => {
     const latest = lastMessageByChat[chat.id] ?? "";
     if (!latest) return "Нет сообщений";
@@ -521,19 +525,24 @@ export function ChatWorkspace() {
         </header>
 
         <div className="messages thread">
-          {messages.map((message) => (
-            <article
-              key={message.id}
-              className={`message-bubble ${message.user_id === user?.id ? "own" : ""} ${exitingMessageIds.includes(message.id) ? "message-exiting" : ""}`}
-              onContextMenu={(event) => {
-                event.preventDefault();
-                setContextMenu({ x: event.clientX, y: event.clientY, type: "message", message });
-              }}
-            >
-              <p>{message.content}</p>
-              <time>{new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</time>
-            </article>
-          ))}
+          {messages.map((message) => {
+            const isOwn = message.user_id === user?.id;
+            return (
+              <div key={message.id} className={`message-item ${isOwn ? "own" : ""}`}>
+                {!isOwn && <span className="message-author">{getMessageAuthorName(message)}</span>}
+                <article
+                  className={`message-bubble ${isOwn ? "own" : ""} ${exitingMessageIds.includes(message.id) ? "message-exiting" : ""}`}
+                  onContextMenu={(event) => {
+                    event.preventDefault();
+                    setContextMenu({ x: event.clientX, y: event.clientY, type: "message", message });
+                  }}
+                >
+                  <p>{message.content}</p>
+                  <time>{new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</time>
+                </article>
+              </div>
+            );
+          })}
         </div>
         <footer className="composer chat-composer">
           <input className="field" placeholder="Write message..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} />

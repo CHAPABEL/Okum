@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "./config";
-import { Chat, Commit, Message, Repository, User } from "./types";
+import { AdminStats, Chat, Commit, Message, Repository, User } from "./types";
 
 async function request<T>(path: string, token: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -108,4 +108,16 @@ export function addChatParticipants(token: string, chatId: number, participantId
 
 export function listCommits(token: string, chatId: number): Promise<Commit[]> {
   return request<Commit[]>(`/chats/${chatId}/commits`, token);
+}
+
+export function getAdminStats(token: string): Promise<AdminStats> {
+  return request<AdminStats>("/user/admin/stats", token);
+}
+
+export function listAdminUsers(token: string): Promise<User[]> {
+  return request<User[]>("/user/admin/users", token);
+}
+
+export function deleteAdminUser(token: string, userId: number): Promise<{ ok: true }> {
+  return request<{ ok: true }>(`/user/admin/users/${userId}`, token, { method: "DELETE" });
 }

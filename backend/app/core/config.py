@@ -26,6 +26,7 @@ class Settings(BaseSettings):
 
     frontend_url: str = Field(default="http://localhost:3000", alias="FRONTEND_URL")
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"], alias="CORS_ORIGINS")
+    admin_email: str = Field(default="", alias="ADMIN_EMAIL")
 
 
 settings = Settings()

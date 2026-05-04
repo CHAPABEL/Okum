@@ -39,3 +39,8 @@ export type Commit = {
   html_url: string;
   committed_at: string;
 };
+
+export type AdminStats = {
+  users_count: number;
+  messages_count: number;
+};

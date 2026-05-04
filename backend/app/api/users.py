@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy import or_
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_github_oauth_account
+from app.api.deps import get_admin_user, get_current_user, get_github_oauth_account
 from app.db.session import get_db
-from app.models.models import User
+from app.models.models import Message, User
 from app.schemas.schemas import UserOut
 from app.services.github import fetch_repositories
 
@@ -43,3 +43,32 @@ def search_users(q: str, current_user: User = Depends(get_current_user), db: Ses
         .all()
     )
     return [UserOut.model_validate(item) for item in users]
+
+
+@router.get("/admin/stats")
+def admin_stats(_: User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    users_count = db.query(func.count(User.id)).scalar() or 0
+    messages_count = db.query(func.count(Message.id)).scalar() or 0
+    return {"users_count": int(users_count), "messages_count": int(messages_count)}
+
+
+@router.get("/admin/users", response_model=list[UserOut])
+def admin_users(_: User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    users = db.query(User).order_by(User.created_at.desc()).all()
+    return [UserOut.model_validate(item) for item in users]
+
+
+@router.delete("/admin/users/{target_user_id}")
+def admin_delete_user(
+    target_user_id: int,
+    admin_user: User = Depends(get_admin_user),
+    db: Session = Depends(get_db),
+):
+    if target_user_id == admin_user.id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Admin cannot delete self")
+    target = db.get(User, target_user_id)
+    if not target:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    db.delete(target)
+    db.commit()
+    return {"ok": True}

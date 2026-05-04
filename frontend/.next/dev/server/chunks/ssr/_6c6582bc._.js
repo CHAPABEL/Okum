@@ -12,6 +12,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8
 "use strict";
 
 __turbopack_context__.s([
+    "addChatParticipants",
+    ()=>addChatParticipants,
     "createChat",
     ()=>createChat,
     "createPersonalChat",
@@ -143,6 +145,14 @@ function deleteMessage(token, chatId, messageId) {
 }
 function listParticipants(token, chatId) {
     return request(`/chats/${chatId}/participants`, token);
+}
+function addChatParticipants(token, chatId, participantIds) {
+    return request(`/chats/${chatId}/participants`, token, {
+        method: "POST",
+        body: JSON.stringify({
+            participant_ids: participantIds
+        })
+    });
 }
 function listCommits(token, chatId) {
     return request(`/chats/${chatId}/commits`, token);
