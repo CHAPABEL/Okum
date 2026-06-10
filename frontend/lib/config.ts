@@ -1,7 +1,8 @@
 const raw = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-/** Пустая строка = тот же origin (через nginx). */
-export const API_BASE_URL = raw === "" ? "" : (raw ?? "http://localhost:8000");
+/** Пустая строка или same-origin = запросы через nginx на том же хосте. */
+export const API_BASE_URL =
+  raw === "" || raw === "same-origin" ? "" : (raw ?? "http://localhost:8000");
 
 export function wsBaseUrl(): string {
   if (API_BASE_URL) {

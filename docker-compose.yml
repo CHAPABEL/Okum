@@ -39,7 +39,8 @@ services:
       - ./frontend:/app
     env_file: .env
     environment:
-      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
+      # `-` без двоеточия: пустая строка в .env сохраняется (для nginx / same origin)
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL-http://localhost:8000}
     depends_on:
       - backend
 
