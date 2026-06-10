@@ -3,6 +3,10 @@ import { AdminStats, Chat, Commit, Message, Repository, User } from "./types";
 
 function parseApiErrorBody(text: string): string {
   if (!text) return "Запрос не выполнен";
+  const trimmed = text.trimStart();
+  if (trimmed.startsWith("<!DOCTYPE") || trimmed.startsWith("<html")) {
+    return "Сервер вернул HTML вместо JSON. Откройте сайт через http://IP (порт 80), не :3000. Проверьте NEXT_PUBLIC_API_BASE_URL= в .env.";
+  }
   try {
     const data = JSON.parse(text) as { detail?: unknown };
     const d = data.detail;
