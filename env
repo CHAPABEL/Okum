@@ -1,0 +1,17 @@
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+DB_URL=postgresql+psycopg://postgres:postgres@postgres:5432/flow
+
+GITHUB_CLIENT_ID=Ov23liFztXmSydz1I1KU
+GITHUB_CLIENT_SECRET=c8548997636c771a77a6e0b615a276646703c166
+GITHUB_REDIRECT_URI=http://localhost:8000/auth/callback
+
+SECRET_KEY=replace-with-secure-random
+FRONTEND_URL=http://localhost:3000
+CORS_ORIGINS=["http://localhost:3000"]
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=nikitabel.moskva@gmail.com
+SMTP_PASSWORD=plxlcpbjguzxhqhm
+SMTP_FROM=nikitabel.moskva@gmail.com
+SMTP_USE_TLS=true

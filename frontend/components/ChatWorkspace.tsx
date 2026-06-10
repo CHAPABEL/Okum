@@ -22,7 +22,7 @@ import {
   searchUsers,
 } from "@/lib/api";
 import { getToken, setToken } from "@/lib/auth";
-import { API_BASE_URL } from "@/lib/config";
+import { wsBaseUrl } from "@/lib/config";
 import { Chat, Commit, Message, Repository, User } from "@/lib/types";
 
 type SidebarMode = "projects" | "personal";
@@ -280,7 +280,7 @@ export function ChatWorkspace() {
 
   useEffect(() => {
     if (!token || !activeChatId) return;
-    const socket = new WebSocket(`${API_BASE_URL.replace("http", "ws")}/ws/chat/${activeChatId}?token=${token}`);
+    const socket = new WebSocket(`${wsBaseUrl()}/ws/chat/${activeChatId}?token=${token}`);
     socketRef.current = socket;
     socket.onmessage = (event) => {
       const payload = JSON.parse(event.data) as Message;
