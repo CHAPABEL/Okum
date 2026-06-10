@@ -32,3 +32,12 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, password_hash: str) -> bool:
     return hmac.compare_digest(hash_password(password), password_hash)
+
+
+def hash_email_otp(email: str, code: str) -> str:
+    normalized = f"{settings.secret_key}:{email.strip().lower()}:{code.strip()}"
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
+def verify_email_otp(email: str, code: str, code_hash: str) -> bool:
+    return hmac.compare_digest(hash_email_otp(email, code), code_hash)

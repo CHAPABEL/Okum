@@ -26,7 +26,16 @@ class Settings(BaseSettings):
 
     frontend_url: str = Field(default="http://localhost:3000", alias="FRONTEND_URL")
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"], alias="CORS_ORIGINS")
-    admin_email: str = Field(default="", alias="ADMIN_EMAIL")
+    admin_email: str = Field(default="admin@flow.local", alias="ADMIN_EMAIL")
+    admin_login: str = Field(default="admin", alias="ADMIN_LOGIN")
+    admin_password: str = Field(default="admin", alias="ADMIN_PASSWORD")
+
+    smtp_host: str = Field(default="", alias="SMTP_HOST")
+    smtp_port: int = Field(default=587, alias="SMTP_PORT")
+    smtp_user: str = Field(default="", alias="SMTP_USER")
+    smtp_password: str = Field(default="", alias="SMTP_PASSWORD")
+    smtp_from: str = Field(default="", alias="SMTP_FROM")
+    smtp_use_tls: bool = Field(default=True, alias="SMTP_USE_TLS")
 
 
 settings = Settings()

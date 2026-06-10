@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="hero">
@@ -5,15 +7,15 @@ export default function Home() {
         FLOW
       </h1>
       <p className="hero-subtitle">
-        Abandon fragmented tooling. Enter a unified workspace engineered for high-velocity teams. All in one Flow.
+        Откажитесь от разрозненных инструментов. Перейдите в единое рабочее пространство для команд с быстрым темпом.
       </p>
       <div className="hero-actions">
-        <a className="btn primary" href="/login">
-          Start Connecting
-        </a>
-        <a className="btn ghost" href="/register">
-          Read Documentation
-        </a>
+        <Link className="btn primary" href="/login">
+          Начать работу
+        </Link>
+        <Link className="btn ghost" href="/register">
+          Создать аккаунт
+        </Link>
       </div>
     </main>
   );

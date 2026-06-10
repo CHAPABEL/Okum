@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 18, "column": 0}, "map": {"version":3,"sources":["file:///Users/chappa/Desktop/Okum/frontend/app/page.tsx"],"sourcesContent":["export default function Home() {\n  return (\n    <main className=\"hero\">\n      <h1 className=\"hero-title\">\n        FLOW\n      </h1>\n      <p className=\"hero-subtitle\">\n        Abandon fragmented tooling. Enter a unified workspace engineered for high-velocity teams. All in one Flow.\n      </p>\n      <div className=\"hero-actions\">\n        <a className=\"btn primary\" href=\"/login\">\n          Start Connecting\n        </a>\n        <a className=\"btn ghost\" href=\"/register\">\n          Read Documentation\n        </a>\n      </div>\n    </main>\n  );\n}\n"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACtB,qBACE,8OAAC;QAAK,WAAU;;0BACd,8OAAC;gBAAG,WAAU;0BAAa;;;;;;0BAG3B,8OAAC;gBAAE,WAAU;0BAAgB;;;;;;0BAG7B,8OAAC;gBAAI,WAAU;;kCACb,8OAAC;wBAAE,WAAU;wBAAc,MAAK;kCAAS;;;;;;kCAGzC,8OAAC;wBAAE,WAAU;wBAAY,MAAK;kCAAY;;;;;;;;;;;;;;;;;;AAMlD"}}]
-}

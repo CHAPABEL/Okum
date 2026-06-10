@@ -2,13 +2,19 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-import { deleteAdminUser, getAdminStats, listAdminUsers } from "@/lib/api";
-import { getToken } from "@/lib/auth";
+import { deleteAdminUser, getAdminStats, listAdminUsers, searchAdminUsers } from "@/lib/api";
+import { clearAdminToken, getAdminToken } from "@/lib/auth";
 import { AdminStats, User } from "@/lib/types";
 
+const ADMIN_FORBIDDEN = "Admin access required";
+
 export default function AdminPage() {
+  const router = useRouter();
+  const [isVisible, setIsVisible] = useState(false);
   const [token, setToken] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState("");
@@ -16,41 +22,68 @@ export default function AdminPage() {
   const [deletingUserId, setDeletingUserId] = useState<number | null>(null);
 
   useEffect(() => {
-    setToken(getToken());
-  }, []);
+    setIsVisible(true);
+    const t = getAdminToken();
+    if (!t) {
+      router.replace("/admin/login");
+      return;
+    }
+    setToken(t);
+  }, [router]);
 
   useEffect(() => {
     if (!token) return;
     const load = async () => {
       try {
         setLoading(true);
-        const [statsData, usersData] = await Promise.all([getAdminStats(token), listAdminUsers(token)]);
+        const usersPromise = searchQuery.trim()
+          ? searchAdminUsers(token, searchQuery.trim())
+          : listAdminUsers(token);
+        const [statsData, usersData] = await Promise.all([getAdminStats(token), usersPromise]);
         setStats(statsData);
         setUsers(usersData);
         setError("");
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to load admin data";
+        const message = err instanceof Error ? err.message : "Не удалось загрузить данные админ-панели";
+        if (message.includes(ADMIN_FORBIDDEN)) {
+          clearAdminToken();
+          router.replace("/admin/login");
+          return;
+        }
         setError(message);
       } finally {
         setLoading(false);
       }
     };
     void load();
-  }, [token]);
+  }, [token, searchQuery, router]);
 
-  const onDeleteUser = async (userId: number) => {
+  const onRefreshAfterDelete = async () => {
+    if (!token) return;
+    const usersPromise = searchQuery.trim()
+      ? searchAdminUsers(token, searchQuery.trim())
+      : listAdminUsers(token);
+    const [statsData, usersData] = await Promise.all([getAdminStats(token), usersPromise]);
+    setStats(statsData);
+    setUsers(usersData);
+  };
+
+  const onDelete = async (userId: number) => {
     if (!token) return;
     const confirmed = window.confirm("Удалить пользователя? Это действие необратимо.");
     if (!confirmed) return;
     try {
       setDeletingUserId(userId);
       await deleteAdminUser(token, userId);
-      const [statsData, usersData] = await Promise.all([getAdminStats(token), listAdminUsers(token)]);
-      setStats(statsData);
-      setUsers(usersData);
+      await onRefreshAfterDelete();
       setError("");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to delete user";
+      const message = err instanceof Error ? err.message : "Не удалось удалить пользователя";
+      if (message.includes(ADMIN_FORBIDDEN)) {
+        clearAdminToken();
+        router.replace("/admin/login");
+        return;
+      }
       setError(message);
     } finally {
       setDeletingUserId(null);
@@ -59,24 +92,35 @@ export default function AdminPage() {
 
   if (!token) {
     return (
-      <main className="center-screen">
-        <div className="panel">
-          <p>Auth token missing. Login first.</p>
-          <Link href="/login" className="btn primary">Login</Link>
-        </div>
+      <main className={`admin-shell admin-fade-in${isVisible ? " visible" : ""}`}>
+        <div className="panel">Перенаправление на вход...</div>
       </main>
     );
   }
 
   return (
-    <main className="admin-shell">
+    <main className={`admin-shell admin-fade-in${isVisible ? " visible" : ""}`}>
       <header className="admin-header">
-        <h1>Admin Panel</h1>
-        <Link href="/chat" className="btn ghost">Back to chat</Link>
+        <h1>Панель администратора</h1>
+        <div className="settings-actions">
+          <button
+            type="button"
+            className="btn settings-logout-btn"
+            onClick={() => {
+              clearAdminToken();
+              router.replace("/admin/login");
+            }}
+          >
+            Выйти
+          </button>
+          <Link href="/chat" className="btn ghost">
+            Назад в чат
+          </Link>
+        </div>
       </header>
 
       {loading ? (
-        <div className="panel">Loading...</div>
+        <div className="panel">Загрузка...</div>
       ) : (
         <>
           <section className="admin-stats">
@@ -88,17 +132,27 @@ export default function AdminPage() {
               <span>Всего отправлено сообщений</span>
               <strong>{stats?.messages_count ?? 0}</strong>
             </div>
+            <div className="admin-stat-card">
+              <span>Зарегистрировано через GitHub</span>
+              <strong>{stats?.github_users_count ?? 0}</strong>
+            </div>
           </section>
 
           <section className="admin-users">
             <h2>Пользователи</h2>
+            <input
+              className="field settings-input"
+              placeholder="Поиск по имени или почте..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
             <div className="admin-users-table-wrap">
               <table className="admin-users-table">
                 <thead>
                   <tr>
                     <th>ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
+                    <th>Имя пользователя</th>
+                    <th>Почта</th>
                     <th />
                   </tr>
                 </thead>
@@ -113,7 +167,7 @@ export default function AdminPage() {
                           type="button"
                           className="btn admin-delete-btn"
                           disabled={deletingUserId === u.id}
-                          onClick={() => void onDeleteUser(u.id)}
+                          onClick={() => void onDelete(u.id)}
                         >
                           {deletingUserId === u.id ? "Удаление..." : "Удалить"}
                         </button>

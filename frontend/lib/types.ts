@@ -3,6 +3,7 @@ export type User = {
   email: string;
   username: string;
   avatar_url: string | null;
+  needs_username?: boolean;
 };
 
 export type Repository = {
@@ -17,6 +18,7 @@ export type Chat = {
   title: string;
   repository?: {
     id: number;
+    github_repo_id: string;
     full_name: string;
     html_url: string;
     default_branch: string;
@@ -43,4 +45,5 @@ export type Commit = {
 export type AdminStats = {
   users_count: number;
   messages_count: number;
+  github_users_count: number;
 };

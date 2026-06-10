@@ -22,7 +22,7 @@ export function AccentColorPicker({
 
   return (
     <section className="settings-block accent-card">
-      <h3 className="settings-block-title">ACCENT COLOR</h3>
+      <h3 className="settings-block-title">АКЦЕНТНЫЙ ЦВЕТ</h3>
       <div className="accent-row">
         {visibleOptions.map((option) => (
           <button
@@ -37,7 +37,7 @@ export function AccentColorPicker({
                     : option.hex,
             }}
             onClick={() => onSelectColor(option.id)}
-            aria-label={`Select ${option.id} accent`}
+            aria-label={`Выбрать акцент ${option.id}`}
           />
         ))}
       </div>

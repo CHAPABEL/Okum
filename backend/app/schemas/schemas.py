@@ -10,6 +10,15 @@ class UserOut(BaseModel):
     email: str
     username: str
     avatar_url: str | None
+    needs_username: bool = False
+
+
+class UsernameUpdateIn(BaseModel):
+    username: str
+
+
+class EmailChangeStartIn(BaseModel):
+    new_email: str
 
 
 class RepositoryOut(BaseModel):
@@ -73,6 +82,16 @@ class AddParticipantsIn(BaseModel):
 
 class EmailAuthIn(BaseModel):
     email: str
+    password: str
+
+
+class EmailVerifyIn(BaseModel):
+    email: str
+    code: str
+
+
+class AdminAuthIn(BaseModel):
+    login: str
     password: str
 
 

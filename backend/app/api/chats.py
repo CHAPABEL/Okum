@@ -5,6 +5,7 @@ from app.api.deps import get_current_user, get_github_oauth_account
 from app.db.session import get_db
 from app.models.models import Chat, ChatParticipant, Commit, Message, Repository, User
 from app.schemas.schemas import AddParticipantsIn, ChatCreateIn, ChatDeleteIn, MessageOut, PersonalChatCreateIn, UserOut
+from app.services.user_profile import user_to_out
 from app.services.github import fetch_repository_commits
 
 router = APIRouter()
@@ -184,7 +185,7 @@ def list_participants(chat_id: int, current_user: User = Depends(get_current_use
     }
     participant_ids.add(chat.user_id)
     participants = db.query(User).filter(User.id.in_(participant_ids)).order_by(User.username.asc()).all()
-    return [UserOut.model_validate(item) for item in participants]
+    return [user_to_out(item) for item in participants]
 
 
 @router.post("/{chat_id}/participants")

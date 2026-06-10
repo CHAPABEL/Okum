@@ -27,7 +27,7 @@ def get_github_oauth_account(db: Session, user_id: int) -> OAuthAccount | None:
 
 
 def get_admin_user(current_user: User = Depends(get_current_user)) -> User:
-    admin_email = settings.admin_email.strip().lower()
+    admin_email = settings.admin_email.strip().lower() or "admin@flow.local"
     if not admin_email or current_user.email.lower() != admin_email:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
     return current_user

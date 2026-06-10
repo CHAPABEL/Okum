@@ -1,6 +1,21 @@
 import { API_BASE_URL } from "./config";
 import { AdminStats, Chat, Commit, Message, Repository, User } from "./types";
 
+function parseApiErrorBody(text: string): string {
+  if (!text) return "Запрос не выполнен";
+  try {
+    const data = JSON.parse(text) as { detail?: unknown };
+    const d = data.detail;
+    if (typeof d === "string") return d;
+    if (Array.isArray(d) && d[0] && typeof (d[0] as { msg?: string }).msg === "string") {
+      return (d[0] as { msg: string }).msg;
+    }
+  } catch {
+    /* not JSON */
+  }
+  return text.length > 400 ? `${text.slice(0, 400)}…` : text;
+}
+
 async function request<T>(path: string, token: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
@@ -11,7 +26,7 @@ async function request<T>(path: string, token: string, options?: RequestInit): P
     },
     cache: "no-store",
   });
-  if (!response.ok) throw new Error(await response.text());
+  if (!response.ok) throw new Error(parseApiErrorBody(await response.text()));
   return (await response.json()) as T;
 }
 
@@ -22,28 +37,70 @@ export async function getGithubLoginUrl(): Promise<string> {
   return data.url;
 }
 
-export async function loginWithEmail(email: string, password: string): Promise<{ token: string; user: User }> {
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+async function postJsonNoAuth<T>(path: string, body: unknown): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(body),
+    cache: "no-store",
   });
-  if (!response.ok) throw new Error("Failed to login");
-  return (await response.json()) as { token: string; user: User };
+  if (!response.ok) throw new Error(parseApiErrorBody(await response.text()));
+  const text = await response.text();
+  if (!text) return {} as T;
+  return JSON.parse(text) as T;
 }
 
-export async function registerWithEmail(email: string, password: string): Promise<{ token: string; user: User }> {
-  const response = await fetch(`${API_BASE_URL}/auth/register`, {
+export async function startEmailRegister(email: string, password: string): Promise<void> {
+  await postJsonNoAuth<{ ok: true }>("/auth/register/start", { email, password });
+}
+
+export async function verifyEmailRegister(email: string, code: string): Promise<{ token: string; user: User }> {
+  return postJsonNoAuth("/auth/register/verify", { email, code });
+}
+
+export async function startEmailLogin(email: string, password: string): Promise<void> {
+  await postJsonNoAuth<{ ok: true }>("/auth/login/start", { email, password });
+}
+
+export async function verifyEmailLogin(email: string, code: string): Promise<{ token: string; user: User }> {
+  return postJsonNoAuth("/auth/login/verify", { email, code });
+}
+
+export async function loginAdmin(login: string, password: string): Promise<{ token: string; user: User }> {
+  const response = await fetch(`${API_BASE_URL}/auth/admin-login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ login, password }),
   });
-  if (!response.ok) throw new Error("Failed to register");
+  if (!response.ok) {
+    throw new Error(parseApiErrorBody(await response.text()) || "Не удалось выполнить вход администратора");
+  }
   return (await response.json()) as { token: string; user: User };
 }
 
 export function getMe(token: string): Promise<User> {
   return request<User>("/user/me", token);
+}
+
+export function updateUsername(token: string, username: string): Promise<User> {
+  return request<User>("/user/me/username", token, {
+    method: "PATCH",
+    body: JSON.stringify({ username }),
+  });
+}
+
+export async function startEmailChange(token: string, newEmail: string): Promise<void> {
+  await request<{ ok: true }>("/user/me/email/start", token, {
+    method: "POST",
+    body: JSON.stringify({ new_email: newEmail }),
+  });
+}
+
+export function verifyEmailChange(token: string, email: string, code: string): Promise<User> {
+  return request<User>("/user/me/email/verify", token, {
+    method: "POST",
+    body: JSON.stringify({ email, code }),
+  });
 }
 
 export function githubStatus(token: string): Promise<{ connected: boolean }> {
@@ -116,6 +173,10 @@ export function getAdminStats(token: string): Promise<AdminStats> {
 
 export function listAdminUsers(token: string): Promise<User[]> {
   return request<User[]>("/user/admin/users", token);
+}
+
+export function searchAdminUsers(token: string, q: string): Promise<User[]> {
+  return request<User[]>(`/user/admin/users/search?q=${encodeURIComponent(q)}`, token);
 }
 
 export function deleteAdminUser(token: string, userId: number): Promise<{ ok: true }> {
