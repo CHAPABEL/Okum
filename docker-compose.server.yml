@@ -1,0 +1,19 @@
+# Timeweb/VPS: исходящий SMTP из Docker часто не доходит до Gmail напрямую.
+# Relay на хосте проксирует TCP на smtp.gmail.com:587 (работает через IPv6 хоста).
+#
+# Запуск: docker compose -f docker-compose.yml -f docker-compose.server.yml up -d
+# В .env на сервере:
+#   SMTP_HOST=host.docker.internal
+#   SMTP_PORT=1587
+
+services:
+  smtp-relay:
+    image: alpine/socat
+    container_name: flow-smtp-relay
+    network_mode: host
+    command: TCP-LISTEN:1587,bind=0.0.0.0,reuseaddr,fork TCP:smtp.gmail.com:587
+    restart: unless-stopped
+
+  backend:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
