@@ -20,8 +20,18 @@ function parseApiErrorBody(text: string): string {
   return text.length > 400 ? `${text.slice(0, 400)}…` : text;
 }
 
+async function fetchApi(input: string, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(input, init);
+  } catch {
+    throw new Error(
+      "Нет связи с API. Откройте сайт через http://IP (порт 80, без :3000) и проверьте, что backend запущен на сервере.",
+    );
+  }
+}
+
 async function request<T>(path: string, token: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetchApi(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -35,14 +45,14 @@ async function request<T>(path: string, token: string, options?: RequestInit): P
 }
 
 export async function getGithubLoginUrl(): Promise<string> {
-  const response = await fetch(`${API_BASE_URL}/auth/github`, { cache: "no-store" });
-  if (!response.ok) throw new Error("Failed to fetch github URL");
+  const response = await fetchApi(`${API_BASE_URL}/auth/github`, { cache: "no-store" });
+  if (!response.ok) throw new Error("Не удалось получить ссылку GitHub");
   const data = (await response.json()) as { url: string };
   return data.url;
 }
 
 async function postJsonNoAuth<T>(path: string, body: unknown): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetchApi(`${API_BASE_URL}${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -71,7 +81,7 @@ export async function verifyEmailLogin(email: string, code: string): Promise<{ t
 }
 
 export async function loginAdmin(login: string, password: string): Promise<{ token: string; user: User }> {
-  const response = await fetch(`${API_BASE_URL}/auth/admin-login`, {
+  const response = await fetchApi(`${API_BASE_URL}/auth/admin-login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ login, password }),

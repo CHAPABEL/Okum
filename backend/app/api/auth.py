@@ -1,7 +1,7 @@
 import secrets
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -17,7 +17,7 @@ from app.core.security import (
 )
 from app.models.models import EmailAuthChallenge, OAuthAccount, User
 from app.schemas.schemas import AdminAuthIn, AuthOut, EmailAuthIn, EmailVerifyIn
-from app.services.email_delivery import send_verification_email_background
+from app.services.email_delivery import send_verification_email
 from app.services.github import exchange_code_for_token, fetch_user
 from app.services.user_profile import pending_username, user_to_out
 
@@ -98,7 +98,7 @@ async def github_callback(code: str, db: Session = Depends(get_db)):
 
 
 @router.post("/register/start")
-def register_start(payload: EmailAuthIn, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+def register_start(payload: EmailAuthIn, db: Session = Depends(get_db)):
     email_norm = _normalize_email(payload.email)
     if len(payload.password) < 8:
         raise HTTPException(status_code=400, detail="Пароль простой")
@@ -109,6 +109,10 @@ def register_start(payload: EmailAuthIn, background_tasks: BackgroundTasks, db: 
         EmailAuthChallenge.purpose == "register",
     ).delete(synchronize_session=False)
     code = f"{secrets.randbelow(1_000_000):06d}"
+    try:
+        send_verification_email(payload.email.strip(), code)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail="Не удалось отправить письмо. Попробуйте позже.") from exc
     challenge = EmailAuthChallenge(
         email=email_norm,
         purpose="register",
@@ -119,7 +123,6 @@ def register_start(payload: EmailAuthIn, background_tasks: BackgroundTasks, db: 
     )
     db.add(challenge)
     db.commit()
-    background_tasks.add_task(send_verification_email_background, payload.email.strip(), code)
     return {"ok": True}
 
 
@@ -156,7 +159,7 @@ def register_verify(payload: EmailVerifyIn, db: Session = Depends(get_db)):
 
 
 @router.post("/login/start")
-def login_start(payload: EmailAuthIn, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+def login_start(payload: EmailAuthIn, db: Session = Depends(get_db)):
     email_norm = _normalize_email(payload.email)
     user = _user_by_email(db, payload.email)
     if not user:
@@ -173,6 +176,10 @@ def login_start(payload: EmailAuthIn, background_tasks: BackgroundTasks, db: Ses
         EmailAuthChallenge.purpose == "login",
     ).delete(synchronize_session=False)
     code = f"{secrets.randbelow(1_000_000):06d}"
+    try:
+        send_verification_email(payload.email.strip(), code)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail="Не удалось отправить письмо. Попробуйте позже.") from exc
     challenge = EmailAuthChallenge(
         email=email_norm,
         purpose="login",
@@ -183,7 +190,6 @@ def login_start(payload: EmailAuthIn, background_tasks: BackgroundTasks, db: Ses
     )
     db.add(challenge)
     db.commit()
-    background_tasks.add_task(send_verification_email_background, payload.email.strip(), code)
     return {"ok": True}
 
 
