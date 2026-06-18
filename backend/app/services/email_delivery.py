@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 _MAX_ATTEMPTS = 3
 _RETRY_DELAY_SEC = 1.5
+_SMTP_TIMEOUT_SEC = 10
 
 
 def send_verification_email(to_addr: str, code: str) -> None:
@@ -62,16 +63,24 @@ def send_verification_email(to_addr: str, code: str) -> None:
     raise RuntimeError("Не удалось отправить письмо") from last_error
 
 
+def send_verification_email_background(to_addr: str, code: str) -> None:
+    """Фоновая отправка: не блокирует HTTP-ответ; код пишется в лог при ошибке SMTP."""
+    try:
+        send_verification_email(to_addr, code)
+    except Exception:
+        logger.exception("SMTP не сработал для %s — код для ручной проверки: %s", to_addr, code)
+
+
 def _deliver(host: str, port: int, user: str, password: str, msg: EmailMessage) -> None:
     if port == 465:
         context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(host, port, context=context, timeout=30) as smtp:
+        with smtplib.SMTP_SSL(host, port, context=context, timeout=_SMTP_TIMEOUT_SEC) as smtp:
             if user:
                 smtp.login(user, password)
             smtp.send_message(msg)
         return
 
-    with smtplib.SMTP(host, port, timeout=30) as smtp:
+    with smtplib.SMTP(host, port, timeout=_SMTP_TIMEOUT_SEC) as smtp:
         if settings.smtp_use_tls:
             context = ssl.create_default_context()
             smtp.starttls(context=context)

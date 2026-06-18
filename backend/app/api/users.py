@@ -1,7 +1,7 @@
 import secrets
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
@@ -10,7 +10,7 @@ from app.core.security import hash_email_otp, verify_email_otp
 from app.db.session import get_db
 from app.models.models import EmailAuthChallenge, Message, OAuthAccount, User
 from app.schemas.schemas import EmailChangeStartIn, EmailVerifyIn, UserOut, UsernameUpdateIn
-from app.services.email_delivery import send_verification_email
+from app.services.email_delivery import send_verification_email_background
 from app.services.github import fetch_repositories
 from app.services.user_profile import user_to_out, validate_username
 
@@ -54,6 +54,7 @@ def update_username(
 @router.post("/me/email/start")
 def email_change_start(
     payload: EmailChangeStartIn,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -67,13 +68,6 @@ def email_change_start(
         EmailAuthChallenge.purpose == "email_change",
     ).delete(synchronize_session=False)
     code = f"{secrets.randbelow(1_000_000):06d}"
-    try:
-        send_verification_email(payload.new_email.strip(), code)
-    except RuntimeError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Не удалось отправить письмо. Попробуйте позже.",
-        ) from exc
     challenge = EmailAuthChallenge(
         email=new_email,
         purpose="email_change",
@@ -84,6 +78,7 @@ def email_change_start(
     )
     db.add(challenge)
     db.commit()
+    background_tasks.add_task(send_verification_email_background, payload.new_email.strip(), code)
     return {"ok": True}
 
 
