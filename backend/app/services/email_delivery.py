@@ -1,5 +1,6 @@
 import logging
 import smtplib
+import socket
 import ssl
 import time
 from email.message import EmailMessage
@@ -10,6 +11,32 @@ logger = logging.getLogger(__name__)
 
 _MAX_ATTEMPTS = 3
 _RETRY_DELAY_SEC = 1.5
+_SMTP_TIMEOUT_SEC = 30
+
+
+def _ipv4_socket(host: str, port: int, timeout: float) -> socket.socket:
+    """Docker bridge часто без IPv6 — smtplib по умолчанию падает с Errno 101."""
+    last_error: OSError | None = None
+    for _, _, _, _, sockaddr in socket.getaddrinfo(host, port, socket.AF_INET, socket.SOCK_STREAM):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        try:
+            sock.connect(sockaddr)
+            return sock
+        except OSError as exc:
+            last_error = exc
+            sock.close()
+    raise OSError(f"IPv4 connect to {host}:{port} failed") from last_error
+
+
+class _SMTPIPv4(smtplib.SMTP):
+    def _get_socket(self, host, port, timeout):
+        return _ipv4_socket(host, port, timeout if timeout is not None else _SMTP_TIMEOUT_SEC)
+
+
+class _SMTPSSLIPv4(smtplib.SMTP_SSL):
+    def _get_socket(self, host, port, timeout):
+        return _ipv4_socket(host, port, timeout if timeout is not None else _SMTP_TIMEOUT_SEC)
 
 
 def send_verification_email(to_addr: str, code: str) -> None:
@@ -65,13 +92,13 @@ def send_verification_email(to_addr: str, code: str) -> None:
 def _deliver(host: str, port: int, user: str, password: str, msg: EmailMessage) -> None:
     if port == 465:
         context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(host, port, context=context, timeout=30) as smtp:
+        with _SMTPSSLIPv4(host, port, context=context, timeout=_SMTP_TIMEOUT_SEC) as smtp:
             if user:
                 smtp.login(user, password)
             smtp.send_message(msg)
         return
 
-    with smtplib.SMTP(host, port, timeout=30) as smtp:
+    with _SMTPIPv4(host, port, timeout=_SMTP_TIMEOUT_SEC) as smtp:
         if settings.smtp_use_tls:
             context = ssl.create_default_context()
             smtp.starttls(context=context)
