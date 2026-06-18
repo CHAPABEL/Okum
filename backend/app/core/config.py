@@ -37,5 +37,8 @@ class Settings(BaseSettings):
     smtp_from: str = Field(default="", alias="SMTP_FROM")
     smtp_use_tls: bool = Field(default=True, alias="SMTP_USE_TLS")
 
+    resend_api_key: str = Field(default="", alias="RESEND_API_KEY")
+    resend_from: str = Field(default="onboarding@resend.dev", alias="RESEND_FROM")
+
 
 settings = Settings()
