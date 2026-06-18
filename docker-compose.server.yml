@@ -11,7 +11,7 @@ services:
     image: alpine/socat
     container_name: flow-smtp-relay
     network_mode: host
-    command: TCP-LISTEN:1587,bind=0.0.0.0,reuseaddr,fork TCP:smtp.gmail.com:587
+    command: TCP-LISTEN:1587,bind=0.0.0.0,reuseaddr,fork TCP4:smtp.gmail.com:587
     restart: unless-stopped
 
   backend:
