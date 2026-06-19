@@ -17,6 +17,25 @@ _SMTP_TIMEOUT_SEC = 30
 _RESEND_API_URL = "https://api.resend.com/emails"
 
 
+def _smtp_configured() -> bool:
+    return bool(
+        settings.smtp_host.strip()
+        and settings.smtp_user.strip()
+        and settings.smtp_password.strip()
+    )
+
+
+def _resolve_provider() -> str:
+    mode = settings.email_provider.strip().lower()
+    if mode in ("smtp", "resend"):
+        return mode
+    if _smtp_configured():
+        return "smtp"
+    if settings.resend_api_key.strip():
+        return "resend"
+    return "none"
+
+
 def send_verification_email(to_addr: str, code: str) -> None:
     body = (
         "Код подтверждения почты: "
@@ -26,14 +45,22 @@ def send_verification_email(to_addr: str, code: str) -> None:
     subject = "Подтверждение почты"
     to_addr = to_addr.strip()
 
-    if settings.resend_api_key.strip():
+    provider = _resolve_provider()
+    if provider == "smtp":
+        if not _smtp_configured():
+            raise RuntimeError("SMTP не настроен: задайте SMTP_HOST, SMTP_USER и SMTP_PASSWORD")
+        _send_via_smtp(to_addr, subject, body)
+        return
+    if provider == "resend":
+        if not settings.resend_api_key.strip():
+            raise RuntimeError("Resend не настроен: задайте RESEND_API_KEY")
         _send_via_resend(to_addr, subject, body)
         return
 
-    if not settings.smtp_host.strip():
-        logger.warning("Почта не настроена — код для %s: %s", to_addr, code)
-        return
+    logger.warning("Почта не настроена — код для %s: %s", to_addr, code)
 
+
+def _send_via_smtp(to_addr: str, subject: str, body: str) -> None:
     from_addr = settings.smtp_from.strip() or settings.smtp_user.strip()
     if not from_addr:
         raise RuntimeError("Задайте SMTP_FROM или SMTP_USER")
@@ -67,7 +94,6 @@ def send_verification_email(to_addr: str, code: str) -> None:
             if attempt < _MAX_ATTEMPTS:
                 time.sleep(_RETRY_DELAY_SEC)
 
-    logger.error("Не удалось отправить письмо на %s после %s попыток", to_addr, _MAX_ATTEMPTS)
     raise RuntimeError("Не удалось отправить письмо") from last_error
 
 
@@ -136,8 +162,7 @@ def _deliver_smtp(host: str, port: int, user: str, password: str, msg: EmailMess
     if port == 465:
         context = ssl.create_default_context()
         with _SMTPSSLIPv4(host, port, context=context, timeout=_SMTP_TIMEOUT_SEC) as smtp:
-            if user:
-                smtp.login(user, password)
+            smtp.login(user, password)
             smtp.send_message(msg)
         return
 
@@ -145,6 +170,5 @@ def _deliver_smtp(host: str, port: int, user: str, password: str, msg: EmailMess
         if settings.smtp_use_tls:
             context = ssl.create_default_context()
             smtp.starttls(context=context)
-        if user:
-            smtp.login(user, password)
+        smtp.login(user, password)
         smtp.send_message(msg)

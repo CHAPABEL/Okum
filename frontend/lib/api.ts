@@ -64,29 +64,29 @@ async function postJsonNoAuth<T>(path: string, body: unknown): Promise<T> {
   return JSON.parse(text) as T;
 }
 
-export async function registerEmail(email: string, password: string): Promise<{ token: string; user: User }> {
-  return postJsonNoAuth("/auth/register", { email, password });
+export async function startEmailRegister(email: string, password: string): Promise<void> {
+  await postJsonNoAuth<{ ok: true }>("/auth/register/start", { email, password });
 }
 
-export async function loginEmail(email: string, password: string): Promise<{ token: string; user: User }> {
-  return postJsonNoAuth("/auth/login", { email, password });
+export async function verifyEmailRegister(email: string, code: string): Promise<{ token: string; user: User }> {
+  return postJsonNoAuth("/auth/register/verify", { email, code });
 }
 
-// --- Email OTP auth (disabled) ---
-// export async function startEmailRegister(email: string, password: string): Promise<void> {
-//   await postJsonNoAuth<{ ok: true }>("/auth/register/start", { email, password });
+export async function startEmailLogin(email: string, password: string): Promise<void> {
+  await postJsonNoAuth<{ ok: true }>("/auth/login/start", { email, password });
+}
+
+export async function verifyEmailLogin(email: string, code: string): Promise<{ token: string; user: User }> {
+  return postJsonNoAuth("/auth/login/verify", { email, code });
+}
+
+// --- Прямая регистрация/вход без OTP (отключено) ---
+// export async function registerEmail(email: string, password: string): Promise<{ token: string; user: User }> {
+//   return postJsonNoAuth("/auth/register", { email, password });
 // }
 //
-// export async function verifyEmailRegister(email: string, code: string): Promise<{ token: string; user: User }> {
-//   return postJsonNoAuth("/auth/register/verify", { email, code });
-// }
-//
-// export async function startEmailLogin(email: string, password: string): Promise<void> {
-//   await postJsonNoAuth<{ ok: true }>("/auth/login/start", { email, password });
-// }
-//
-// export async function verifyEmailLogin(email: string, code: string): Promise<{ token: string; user: User }> {
-//   return postJsonNoAuth("/auth/login/verify", { email, code });
+// export async function loginEmail(email: string, password: string): Promise<{ token: string; user: User }> {
+//   return postJsonNoAuth("/auth/login", { email, password });
 // }
 
 export async function loginAdmin(login: string, password: string): Promise<{ token: string; user: User }> {

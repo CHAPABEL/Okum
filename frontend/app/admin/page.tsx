@@ -8,7 +8,11 @@ import { deleteAdminUser, getAdminStats, listAdminUsers, searchAdminUsers } from
 import { clearAdminToken, getAdminToken } from "@/lib/auth";
 import { AdminStats, User } from "@/lib/types";
 
-const ADMIN_FORBIDDEN = "Admin access required";
+const AUTH_ERRORS = ["Admin access required", "Unauthorized", "Invalid token", "User not found"];
+
+function isAdminAuthError(message: string): boolean {
+  return AUTH_ERRORS.some((part) => message.includes(part));
+}
 
 export default function AdminPage() {
   const router = useRouter();
@@ -45,7 +49,7 @@ export default function AdminPage() {
         setError("");
       } catch (err) {
         const message = err instanceof Error ? err.message : "Не удалось загрузить данные админ-панели";
-        if (message.includes(ADMIN_FORBIDDEN)) {
+        if (isAdminAuthError(message)) {
           clearAdminToken();
           router.replace("/admin/login");
           return;
@@ -79,7 +83,7 @@ export default function AdminPage() {
       setError("");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Не удалось удалить пользователя";
-      if (message.includes(ADMIN_FORBIDDEN)) {
+      if (isAdminAuthError(message)) {
         clearAdminToken();
         router.replace("/admin/login");
         return;

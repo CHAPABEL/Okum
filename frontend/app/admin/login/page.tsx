@@ -45,6 +45,7 @@ export default function AdminLoginPage() {
       <section className="admin-login-card">
         <h1>Вход администратора</h1>
         <p className="muted small">Отдельная авторизация для панели администратора</p>
+        <p className="muted small">По умолчанию: логин <strong>admin</strong>, пароль <strong>admin</strong> (задаётся в .env)</p>
         <label className="auth-label">ЛОГИН</label>
         <input
           className="field auth-field"

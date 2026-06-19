@@ -4,7 +4,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { getGithubLoginUrl, getMe, loginEmail, registerEmail, updateUsername } from "@/lib/api";
+import {
+  getGithubLoginUrl,
+  getMe,
+  startEmailLogin,
+  startEmailRegister,
+  updateUsername,
+  verifyEmailLogin,
+  verifyEmailRegister,
+} from "@/lib/api";
 import { getToken, setToken } from "@/lib/auth";
 
 type Props = {
@@ -18,17 +26,17 @@ export function AuthCard({ mode }: Props) {
   const [step, setStep] = useState<Step>("form");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
-  // const [code, setCode] = useState("");
+  const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  // const codeInputRef = useRef<HTMLInputElement>(null);
+  const codeInputRef = useRef<HTMLInputElement>(null);
   const usernameInputRef = useRef<HTMLInputElement>(null);
 
   const isLogin = mode === "login";
   const isWeakPassword = password.length > 0 && password.length < 8;
-  // const isPasswordMismatch = !isLogin && confirmPassword.length > 0 && password !== confirmPassword;
+  const isPasswordMismatch = !isLogin && confirmPassword.length > 0 && password !== confirmPassword;
 
   useEffect(() => {
     const token = getToken();
@@ -42,11 +50,11 @@ export function AuthCard({ mode }: Props) {
     });
   }, [router]);
 
-  // useEffect(() => {
-  //   if (step !== "verify") return;
-  //   const id = window.setTimeout(() => codeInputRef.current?.focus(), 400);
-  //   return () => window.clearTimeout(id);
-  // }, [step]);
+  useEffect(() => {
+    if (step !== "verify") return;
+    const id = window.setTimeout(() => codeInputRef.current?.focus(), 400);
+    return () => window.clearTimeout(id);
+  }, [step]);
 
   useEffect(() => {
     if (step !== "username") return;
@@ -59,14 +67,34 @@ export function AuthCard({ mode }: Props) {
       setError("Пароль простой");
       return;
     }
-    // if (!isLogin && password !== confirmPassword) {
-    //   setError("Пароли не совпадают");
-    //   return;
-    // }
+    if (!isLogin && password !== confirmPassword) {
+      setError("Пароли не совпадают");
+      return;
+    }
     try {
       setLoading(true);
       setError("");
-      const result = isLogin ? await loginEmail(email, password) : await registerEmail(email, password);
+      if (isLogin) {
+        await startEmailLogin(email, password);
+      } else {
+        await startEmailRegister(email, password);
+      }
+      setCode("");
+      setStep("verify");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : isLogin ? "Не удалось отправить код" : "Не удалось начать регистрацию";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const submitCode = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const result = isLogin ? await verifyEmailLogin(email, code) : await verifyEmailRegister(email, code);
       setToken(result.token);
       if (result.user.needs_username) {
         setUsername("");
@@ -75,34 +103,12 @@ export function AuthCard({ mode }: Props) {
       }
       router.replace("/chat");
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : isLogin ? "Не удалось войти" : "Не удалось зарегистрироваться";
+      const message = err instanceof Error ? err.message : "Неверный код или срок действия истёк";
       setError(message);
     } finally {
       setLoading(false);
     }
   };
-
-  // --- Email OTP (disabled) ---
-  // const submitCode = async () => {
-  //   try {
-  //     setLoading(true);
-  //     setError("");
-  //     const result = isLogin ? await verifyEmailLogin(email, code) : await verifyEmailRegister(email, code);
-  //     setToken(result.token);
-  //     if (result.user.needs_username) {
-  //       setUsername("");
-  //       setStep("username");
-  //       return;
-  //     }
-  //     router.replace("/chat");
-  //   } catch (err) {
-  //     const message = err instanceof Error ? err.message : "Неверный код или срок действия истёк";
-  //     setError(message);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const submitUsername = async () => {
     const token = getToken();
@@ -120,11 +126,11 @@ export function AuthCard({ mode }: Props) {
     }
   };
 
-  // const backToForm = () => {
-  //   setStep("form");
-  //   setCode("");
-  //   setError("");
-  // };
+  const backToForm = () => {
+    setStep("form");
+    setCode("");
+    setError("");
+  };
 
   const loginGithub = async () => {
     const url = await getGithubLoginUrl();
@@ -165,7 +171,6 @@ export function AuthCard({ mode }: Props) {
                 }}
                 disabled={step !== "form"}
               />
-              {/* Email OTP registration (disabled)
               {!isLogin && (
                 <>
                   <label className="auth-label">ПОДТВЕРЖДЕНИЕ ПАРОЛЯ</label>
@@ -185,20 +190,24 @@ export function AuthCard({ mode }: Props) {
                   />
                 </>
               )}
-              */}
               {isWeakPassword && step === "form" && <p className="error">Пароль простой</p>}
+              {isPasswordMismatch && step === "form" && <p className="error">Пароли не совпадают</p>}
               {error && step === "form" && <p className="error">{error}</p>}
               <button
                 className="btn primary"
                 type="button"
                 onClick={() => void submitForm()}
-                disabled={loading || !email || !password || isWeakPassword || step !== "form"}
+                disabled={
+                  loading ||
+                  !email ||
+                  !password ||
+                  (!isLogin && !confirmPassword) ||
+                  isWeakPassword ||
+                  isPasswordMismatch ||
+                  step !== "form"
+                }
               >
-                {loading && step === "form"
-                  ? "Подождите..."
-                  : isLogin
-                    ? "Войти"
-                    : "Зарегистрироваться"}
+                {loading && step === "form" ? "Подождите..." : isLogin ? "Далее" : "Получить код"}
               </button>
               <p className="muted small">
                 {isLogin ? "Нет аккаунта?" : "Уже есть аккаунт?"}{" "}
@@ -206,7 +215,6 @@ export function AuthCard({ mode }: Props) {
               </p>
             </section>
 
-            {/* Email OTP verify step (disabled)
             <section className={stepClass("verify", "right")}>
               <h1>Заполните код</h1>
               <p className="muted small">Код из письма отправлен на {email || "вашу почту"}</p>
@@ -237,7 +245,6 @@ export function AuthCard({ mode }: Props) {
                 Назад
               </button>
             </section>
-            */}
 
             <section className={stepClass("username", "right")}>
               <h1>Напишите юзернейм</h1>

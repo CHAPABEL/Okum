@@ -2702,6 +2702,39 @@ a {
   font-size: 1.3rem;
 }
 
+.admin-login-card .field.auth-field {
+  background: #0d1118;
+  color: #e8ecf8;
+  border-color: #2a3345;
+}
+
+.admin-login-card .field.auth-field::placeholder {
+  color: #8f9bb3;
+}
+
+.admin-login-card .field.auth-field:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+.admin-login-card .auth-label {
+  color: #9aa8c2;
+}
+
+:root[data-theme="light"] .admin-login-card .auth-label {
+  color: #60708a;
+}
+
+:root[data-theme="light"] .admin-login-card .field.auth-field {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+:root[data-theme="light"] .admin-login-card .field.auth-field::placeholder {
+  color: #64748b;
+}
+
 .admin-header {
   max-width: 1080px;
   margin: 0 auto 1rem;
