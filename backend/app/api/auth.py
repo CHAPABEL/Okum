@@ -19,7 +19,7 @@ from app.models.models import EmailAuthChallenge, OAuthAccount, User
 from app.schemas.schemas import AdminAuthIn, AuthOut, EmailAuthIn, EmailVerifyIn
 from app.services.email_delivery import send_verification_email
 from app.services.github import exchange_code_for_token, fetch_user
-from app.services.user_profile import pending_username, user_to_out
+from app.services.user_profile import default_username_from_email, pending_username, user_to_out
 
 router = APIRouter()
 
@@ -97,70 +97,29 @@ async def github_callback(code: str, db: Session = Depends(get_db)):
     return RedirectResponse(url=f"{settings.frontend_url}/chat?token={token}")
 
 
-@router.post("/register/start")
-def register_start(payload: EmailAuthIn, db: Session = Depends(get_db)):
+@router.post("/register", response_model=AuthOut)
+def register(payload: EmailAuthIn, db: Session = Depends(get_db)):
     email_norm = _normalize_email(payload.email)
     if len(payload.password) < 8:
         raise HTTPException(status_code=400, detail="Пароль простой")
     if _user_by_email(db, payload.email):
         raise HTTPException(status_code=400, detail="Этот адрес уже зарегистрирован")
-    db.query(EmailAuthChallenge).filter(
-        EmailAuthChallenge.email == email_norm,
-        EmailAuthChallenge.purpose == "register",
-    ).delete(synchronize_session=False)
-    code = f"{secrets.randbelow(1_000_000):06d}"
-    try:
-        send_verification_email(payload.email.strip(), code)
-    except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail="Не удалось отправить письмо. Попробуйте позже.") from exc
-    challenge = EmailAuthChallenge(
+    taken = {name.lower() for (name,) in db.query(User.username).all()}
+    username = default_username_from_email(email_norm, taken)
+    user = User(
         email=email_norm,
-        purpose="register",
-        user_id=None,
+        username=username,
+        avatar_url=None,
         password_hash=hash_password(payload.password),
-        code_hash=hash_email_otp(email_norm, code),
-        expires_at=datetime.now(timezone.utc) + _OTP_TTL,
     )
-    db.add(challenge)
-    db.commit()
-    return {"ok": True}
-
-
-@router.post("/register/verify", response_model=AuthOut)
-def register_verify(payload: EmailVerifyIn, db: Session = Depends(get_db)):
-    email_norm = _normalize_email(payload.email)
-    code = _normalize_otp(payload.code)
-    if len(code) != 6:
-        raise HTTPException(status_code=400, detail="Введите 6 цифр кода")
-    challenge = (
-        db.query(EmailAuthChallenge)
-        .filter(EmailAuthChallenge.email == email_norm, EmailAuthChallenge.purpose == "register")
-        .first()
-    )
-    if not challenge or challenge.expires_at < datetime.now(timezone.utc):
-        raise HTTPException(status_code=400, detail="Неверный или просроченный код")
-    if not verify_email_otp(email_norm, code, challenge.code_hash):
-        raise HTTPException(status_code=400, detail="Неверный или просроченный код")
-    if _user_by_email(db, payload.email):
-        db.delete(challenge)
-        db.commit()
-        raise HTTPException(status_code=400, detail="Этот адрес уже зарегистрирован")
-    ph = challenge.password_hash
-    if not ph:
-        db.delete(challenge)
-        db.commit()
-        raise HTTPException(status_code=400, detail="Неверный или просроченный код")
-    user = User(email=email_norm, username=pending_username(), avatar_url=None, password_hash=ph)
-    db.delete(challenge)
     db.add(user)
     db.commit()
     db.refresh(user)
     return AuthOut(token=create_access_token(user.id), user=user_to_out(user))
 
 
-@router.post("/login/start")
-def login_start(payload: EmailAuthIn, db: Session = Depends(get_db)):
-    email_norm = _normalize_email(payload.email)
+@router.post("/login", response_model=AuthOut)
+def login(payload: EmailAuthIn, db: Session = Depends(get_db)):
     user = _user_by_email(db, payload.email)
     if not user:
         raise HTTPException(status_code=401, detail="Неверный email или пароль")
@@ -171,51 +130,130 @@ def login_start(payload: EmailAuthIn, db: Session = Depends(get_db)):
         )
     if not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Неверный email или пароль")
-    db.query(EmailAuthChallenge).filter(
-        EmailAuthChallenge.email == email_norm,
-        EmailAuthChallenge.purpose == "login",
-    ).delete(synchronize_session=False)
-    code = f"{secrets.randbelow(1_000_000):06d}"
-    try:
-        send_verification_email(payload.email.strip(), code)
-    except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail="Не удалось отправить письмо. Попробуйте позже.") from exc
-    challenge = EmailAuthChallenge(
-        email=email_norm,
-        purpose="login",
-        user_id=user.id,
-        password_hash=None,
-        code_hash=hash_email_otp(email_norm, code),
-        expires_at=datetime.now(timezone.utc) + _OTP_TTL,
-    )
-    db.add(challenge)
-    db.commit()
-    return {"ok": True}
-
-
-@router.post("/login/verify", response_model=AuthOut)
-def login_verify(payload: EmailVerifyIn, db: Session = Depends(get_db)):
-    email_norm = _normalize_email(payload.email)
-    code = _normalize_otp(payload.code)
-    if len(code) != 6:
-        raise HTTPException(status_code=400, detail="Введите 6 цифр кода")
-    challenge = (
-        db.query(EmailAuthChallenge)
-        .filter(EmailAuthChallenge.email == email_norm, EmailAuthChallenge.purpose == "login")
-        .first()
-    )
-    if not challenge or challenge.expires_at < datetime.now(timezone.utc):
-        raise HTTPException(status_code=400, detail="Неверный или просроченный код")
-    if not challenge.user_id or not verify_email_otp(email_norm, code, challenge.code_hash):
-        raise HTTPException(status_code=400, detail="Неверный или просроченный код")
-    user = db.get(User, challenge.user_id)
-    if not user:
-        db.delete(challenge)
-        db.commit()
-        raise HTTPException(status_code=400, detail="Неверный или просроченный код")
-    db.delete(challenge)
-    db.commit()
     return AuthOut(token=create_access_token(user.id), user=user_to_out(user))
+
+
+# --- Email OTP auth (disabled; restore register/start + verify and login/start + verify to re-enable) ---
+#
+# @router.post("/register/start")
+# def register_start(payload: EmailAuthIn, db: Session = Depends(get_db)):
+#     email_norm = _normalize_email(payload.email)
+#     if len(payload.password) < 8:
+#         raise HTTPException(status_code=400, detail="Пароль простой")
+#     if _user_by_email(db, payload.email):
+#         raise HTTPException(status_code=400, detail="Этот адрес уже зарегистрирован")
+#     db.query(EmailAuthChallenge).filter(
+#         EmailAuthChallenge.email == email_norm,
+#         EmailAuthChallenge.purpose == "register",
+#     ).delete(synchronize_session=False)
+#     code = f"{secrets.randbelow(1_000_000):06d}"
+#     try:
+#         send_verification_email(payload.email.strip(), code)
+#     except RuntimeError as exc:
+#         raise HTTPException(status_code=503, detail="Не удалось отправить письмо. Попробуйте позже.") from exc
+#     challenge = EmailAuthChallenge(
+#         email=email_norm,
+#         purpose="register",
+#         user_id=None,
+#         password_hash=hash_password(payload.password),
+#         code_hash=hash_email_otp(email_norm, code),
+#         expires_at=datetime.now(timezone.utc) + _OTP_TTL,
+#     )
+#     db.add(challenge)
+#     db.commit()
+#     return {"ok": True}
+#
+#
+# @router.post("/register/verify", response_model=AuthOut)
+# def register_verify(payload: EmailVerifyIn, db: Session = Depends(get_db)):
+#     email_norm = _normalize_email(payload.email)
+#     code = _normalize_otp(payload.code)
+#     if len(code) != 6:
+#         raise HTTPException(status_code=400, detail="Введите 6 цифр кода")
+#     challenge = (
+#         db.query(EmailAuthChallenge)
+#         .filter(EmailAuthChallenge.email == email_norm, EmailAuthChallenge.purpose == "register")
+#         .first()
+#     )
+#     if not challenge or challenge.expires_at < datetime.now(timezone.utc):
+#         raise HTTPException(status_code=400, detail="Неверный или просроченный код")
+#     if not verify_email_otp(email_norm, code, challenge.code_hash):
+#         raise HTTPException(status_code=400, detail="Неверный или просроченный код")
+#     if _user_by_email(db, payload.email):
+#         db.delete(challenge)
+#         db.commit()
+#         raise HTTPException(status_code=400, detail="Этот адрес уже зарегистрирован")
+#     ph = challenge.password_hash
+#     if not ph:
+#         db.delete(challenge)
+#         db.commit()
+#         raise HTTPException(status_code=400, detail="Неверный или просроченный код")
+#     user = User(email=email_norm, username=pending_username(), avatar_url=None, password_hash=ph)
+#     db.delete(challenge)
+#     db.add(user)
+#     db.commit()
+#     db.refresh(user)
+#     return AuthOut(token=create_access_token(user.id), user=user_to_out(user))
+#
+#
+# @router.post("/login/start")
+# def login_start(payload: EmailAuthIn, db: Session = Depends(get_db)):
+#     email_norm = _normalize_email(payload.email)
+#     user = _user_by_email(db, payload.email)
+#     if not user:
+#         raise HTTPException(status_code=401, detail="Неверный email или пароль")
+#     if not user.password_hash:
+#         raise HTTPException(
+#             status_code=400,
+#             detail="Для этого аккаунта доступен только вход через GitHub",
+#         )
+#     if not verify_password(payload.password, user.password_hash):
+#         raise HTTPException(status_code=401, detail="Неверный email или пароль")
+#     db.query(EmailAuthChallenge).filter(
+#         EmailAuthChallenge.email == email_norm,
+#         EmailAuthChallenge.purpose == "login",
+#     ).delete(synchronize_session=False)
+#     code = f"{secrets.randbelow(1_000_000):06d}"
+#     try:
+#         send_verification_email(payload.email.strip(), code)
+#     except RuntimeError as exc:
+#         raise HTTPException(status_code=503, detail="Не удалось отправить письмо. Попробуйте позже.") from exc
+#     challenge = EmailAuthChallenge(
+#         email=email_norm,
+#         purpose="login",
+#         user_id=user.id,
+#         password_hash=None,
+#         code_hash=hash_email_otp(email_norm, code),
+#         expires_at=datetime.now(timezone.utc) + _OTP_TTL,
+#     )
+#     db.add(challenge)
+#     db.commit()
+#     return {"ok": True}
+#
+#
+# @router.post("/login/verify", response_model=AuthOut)
+# def login_verify(payload: EmailVerifyIn, db: Session = Depends(get_db)):
+#     email_norm = _normalize_email(payload.email)
+#     code = _normalize_otp(payload.code)
+#     if len(code) != 6:
+#         raise HTTPException(status_code=400, detail="Введите 6 цифр кода")
+#     challenge = (
+#         db.query(EmailAuthChallenge)
+#         .filter(EmailAuthChallenge.email == email_norm, EmailAuthChallenge.purpose == "login")
+#         .first()
+#     )
+#     if not challenge or challenge.expires_at < datetime.now(timezone.utc):
+#         raise HTTPException(status_code=400, detail="Неверный или просроченный код")
+#     if not challenge.user_id or not verify_email_otp(email_norm, code, challenge.code_hash):
+#         raise HTTPException(status_code=400, detail="Неверный или просроченный код")
+#     user = db.get(User, challenge.user_id)
+#     if not user:
+#         db.delete(challenge)
+#         db.commit()
+#         raise HTTPException(status_code=400, detail="Неверный или просроченный код")
+#     db.delete(challenge)
+#     db.commit()
+#     return AuthOut(token=create_access_token(user.id), user=user_to_out(user))
 
 
 @router.post("/admin-login", response_model=AuthOut)

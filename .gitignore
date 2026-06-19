@@ -1,4 +1,7 @@
 # Secre
+.env
+.env.local
+frontend/.env.local
 
 # OS
 .DS_Store

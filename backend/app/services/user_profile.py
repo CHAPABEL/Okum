@@ -12,6 +12,20 @@ def pending_username() -> str:
     return f"{USERNAME_PENDING_PREFIX}{secrets.token_hex(8)}"
 
 
+def default_username_from_email(email: str, taken: set[str]) -> str:
+    local = email.split("@", 1)[0]
+    base = re.sub(r"[^a-zA-Z0-9_а-яА-ЯёЁ]", "_", local).strip("_")[:24]
+    if len(base) < 3:
+        base = "user"
+    candidate = base[:32]
+    n = 0
+    while candidate.lower() in taken:
+        n += 1
+        suffix = f"_{n}"
+        candidate = f"{base[: 32 - len(suffix)]}{suffix}"
+    return candidate
+
+
 def needs_username(user: User) -> bool:
     return user.username.startswith(USERNAME_PENDING_PREFIX)
 
